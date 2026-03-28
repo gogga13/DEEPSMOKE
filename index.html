@@ -1,0 +1,395 @@
+﻿{% load static %}
+{% load socialaccount %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VapeLand | Рј.РњРёРєРѕР»Р°С—РІ</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}?v=20260326-1">
+</head>
+<body>
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 style="font-family: var(--font-title); font-size: 2.2rem; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.08em;">Р’С…С–Рґ Сѓ <span>VapeLand</span></h2>
+            <p style="color: var(--text-gray); margin: 0 0 30px;">РЈРІС–Р№РґС–С‚СЊ Сѓ СЃРІС–Р№ Р°РєР°СѓРЅС‚, С‰РѕР± РѕС„РѕСЂРјР»СЋРІР°С‚Рё Р·Р°РјРѕРІР»РµРЅРЅСЏ С‰Рµ С€РІРёРґС€Рµ.</p>
+
+            <a href="{% provider_login_url 'google' %}" class="auth-btn google-btn">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_Logo.svg" alt="Google">
+                РЈРІС–Р№С‚Рё С‡РµСЂРµР· Google
+            </a>
+
+            <p style="margin-top: 25px; font-size: 1rem; color: var(--text-gray);">
+                РќРµРјР°С” Р°РєР°СѓРЅС‚Р°?
+                <a href="{% url 'account_signup' %}" style="color: var(--accent-pink); font-weight: 700; text-decoration: none;">Р—Р°СЂРµС”СЃС‚СЂСѓРІР°С‚РёСЃСЏ</a>
+            </p>
+        </div>
+    </div>
+
+    <div class="glow-bg"></div>
+
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">VAPE <span>LAND</span></a>
+            <ul class="nav-links">
+                <li class="cart-wrapper">
+                    <a href="{% url 'cart_detail' %}" class="btn-ghost cart-trigger">
+                        рџ›’ РљРћРЁРРљ <span id="cart-count">{{ cart_count }}</span>
+                    </a>
+                    <div class="mini-cart">
+                        {% if cart_products %}
+                            <div class="mini-cart-items">
+                                {% for item in cart_products %}
+                                <div class="mini-item">
+                                    {% if item.product.image %}
+                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                                    {% else %}
+                                    <img src="https://via.placeholder.com/100x100?text=VapeLand" alt="{{ item.product.name }}">
+                                    {% endif %}
+                                    <div class="mini-info">
+                                        <p class="mini-name">{{ item.product.name }}</p>
+                                        <p class="mini-meta">{{ item.quantity }} С€С‚. x {{ item.product.price|floatformat:0 }} РіСЂРЅ</p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="mini-footer">
+                                <p>Р Р°Р·РѕРј: <span>{{ cart_total|floatformat:0 }} РіСЂРЅ</span></p>
+                                <a href="{% url 'checkout' %}" class="btn-primary" style="width: 100%; text-align: center; text-decoration: none;">РћР¤РћР РњРРўР</a>
+                            </div>
+                        {% else %}
+                            <p style="padding: 8px 0; color: var(--text-gray); text-align: center; font-size: 0.9rem; margin: 0;">РљРѕС€РёРє РїРѕСЂРѕР¶РЅС–Р№ рџ’Ё</p>
+                        {% endif %}
+                    </div>
+                </li>
+                <li><a href="#catalog">РљР°С‚Р°Р»РѕРі</a></li>
+                <li><a href="{% url 'discounts' %}">Р—РЅРёР¶РєРё</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'profile' %}" class="nav-profile">РџР РР’Р†Рў, {{ user.first_name|upper|default:user.username|upper }}!</a></li>
+                    <li><a href="{% url 'account_logout' %}" class="nav-secondary">Р’РР™РўР</a></li>
+                {% else %}
+                    <li><a href="#" class="nav-cta">18+ Р’РҐР†Р”</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <section class="hero-catalog container">
+        <header class="hero">
+            <div class="hero-panel animate-fade">
+                <div class="hero-copy">
+                    <span class="hero-eyebrow">WELCOME TO VAPELAND</span>
+                    <h1 class="hero-title">Р’Р”РРҐРђР™ <em>РќР•РћРќ</em><br>РћР‘РР РђР™ <span>РҐРњРђР РЈ</span></h1>
+                    <p class="hero-subtitle">
+                        РџСЂРµРјС–Р°Р»СЊРЅС– POD-СЃРёСЃС‚РµРјРё, РєР°СЂС‚СЂРёРґР¶С– С‚Р° СЂС–РґРёРЅРё РґР»СЏ С‚РёС…, С…С‚Рѕ Р»СЋР±РёС‚СЊ СЏСЃРєСЂР°РІРёР№ СЃРјР°Рє С– С€РІРёРґРєРёР№ СЃРµСЂРІС–СЃ.
+                        Р”РѕСЃС‚Р°РІРєР° РїРѕ РјС–СЃС‚Сѓ <strong>РњРёРєРѕР»Р°С—РІ</strong> С‰РѕРґРЅСЏ Р· <strong>09:00 РґРѕ 20:00</strong>.
+                    </p>
+                    <div class="hero-stats">
+                        <div class="hero-stat">
+                            <span>РјС–СЃС‚Рѕ</span>
+                            <strong>Рј.РњРёРєРѕР»Р°С—РІ</strong>
+                        </div>
+                        <div class="hero-stat">
+                            <span>РіСЂР°С„С–Рє</span>
+                            <strong>09:00-20:00</strong>
+                        </div>
+                        <div class="hero-stat">
+                            <span>С„РѕСЂРјР°С‚</span>
+                            <strong>Р‘РµР·РєРѕС€С‚РѕРІРЅР° РґРѕСЃС‚Р°РІРєР° РїРѕ РјС–СЃС‚Сѓ РњРёРєРѕР»Р°С—РІ</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        {% if catalog_menu %}
+        <aside class="catalog-showcase" aria-label="РљР°С‚Р°Р»РѕРі С‚РѕРІР°СЂС–РІ">
+            <div class="catalog-panel" id="catalog-panel">
+                <div class="catalog-sidebar">
+                    <button class="catalog-header" id="catalog-trigger" type="button" aria-expanded="false" aria-controls="catalog-detail">
+                        <span class="catalog-header-badge"><span></span><span></span><span></span><span></span></span>
+                        <span class="catalog-header-label">РљР°С‚Р°Р»РѕРі С‚РѕРІР°СЂС–РІ</span>
+                        <svg class="catalog-header-arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <ul class="catalog-category-list">
+                        {% for category in catalog_menu %}
+                        <li>
+                            <button class="catalog-category-item" type="button" data-catalog-target="{{ category.key }}" aria-controls="panel-{{ category.key }}" aria-expanded="false">
+                                <span class="catalog-category-icon">{{ category.icon_svg }}</span>
+                                <span class="catalog-category-name">{{ category.label }}</span>
+                                <svg class="catalog-category-arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </button>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="catalog-detail" id="catalog-detail" aria-hidden="true">
+                    <nav class="catalog-shortcuts">
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'profile' %}">РњС–Р№ РїСЂРѕС„С–Р»СЊ</a>
+                        {% else %}
+                        <a href="{% url 'account_login' %}">РЈРІС–Р№С‚Рё</a>
+                        {% endif %}
+                        <a href="#catalog">РљРѕР»РµРєС†С–С—</a>
+                        <a href="#catalog">РќРѕРІРёРЅРєРё</a>
+                        <a href="#contact">Р”РѕСЃС‚Р°РІРєР°</a>
+                        <a href="#contact">Р“СЂР°С„С–Рє</a>
+                    </nav>
+
+                    {% for category in catalog_menu %}
+                    <section class="catalog-detail-pane" data-catalog-pane="{{ category.key }}" id="panel-{{ category.key }}">
+                        <div class="catalog-detail-grid">
+                            <div class="catalog-detail-column">
+                                <p class="catalog-column-eyebrow">{{ category.featured_group_title }}</p>
+                                <h3 class="catalog-column-title">{{ category.featured_list_title }}</h3>
+                                <div class="catalog-detail-links">
+                                    {% for item in category.featured_links %}
+                                    <a href="{{ item.url }}" class="catalog-detail-link">{{ item.label }}</a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <div class="catalog-detail-column">
+                                <p class="catalog-column-eyebrow">{{ category.brands_group_title }}</p>
+                                <h3 class="catalog-column-title">{{ category.brands_list_title }}</h3>
+                                <div class="catalog-detail-links">
+                                    {% for item in category.brand_links %}
+                                    <a href="{{ item.url }}" class="catalog-detail-link">{{ item.label }}</a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <div class="catalog-detail-column catalog-detail-column--actions">
+                                {% for item in category.quick_links %}
+                                <a href="{{ item.url }}" class="catalog-action-link">{{ item.label }}</a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </section>
+                    {% endfor %}
+                </div>
+            </div>
+        </aside>
+        {% endif %}
+    </section>
+
+    <div class="marquee-strip">
+        <div class="marquee-track">
+            <span>ELF BAR</span> <span class="dot">вЂў</span> <span>LOST MARY</span> <span class="dot">вЂў</span> <span>CHASER</span> <span class="dot">вЂў</span> <span>OXVA</span> <span class="dot">вЂў</span> <span>GEEKVAPE</span> <span class="dot">вЂў</span> <span>VAPORESSO</span> <span class="dot">вЂў</span> <span>VOOPOO</span> <span class="dot">вЂў</span>
+        </div>
+    </div>
+
+    <section class="section container" id="catalog">
+        <div class="section-header">
+            <p class="section-kicker">Neon Picks</p>
+            <h2 class="section-title">РђРєС‚СѓР°Р»СЊРЅС– <span>РїРѕР·РёС†С–С—</span></h2>
+            <p class="section-copy">Р”РѕР±С–СЂРєР° С‚РѕРІР°СЂС–РІ, СЏРєС– Р·Р°СЂР°Р· С„РѕСЂРјСѓСЋС‚СЊ РіРѕР»РѕРІРЅСѓ РІС–С‚СЂРёРЅСѓ VapeLand. РќР°С‚РёСЃРєР°Р№С‚Рµ РЅР° РєР°СЂС‚РєСѓ, С‰РѕР± РїРµСЂРµР№С‚Рё РІ РґРµС‚Р°Р»С–, Р°Р±Рѕ РѕРґСЂР°Р·Сѓ РґРѕРґР°РІР°Р№С‚Рµ РІ РєРѕС€РёРє.</p>
+        </div>
+        <div class="product-grid">
+            {% for product in products %}
+            <div class="product-card animate-fade">
+                <a href="{% url 'product_detail' product.pk %}" style="text-decoration: none; color: inherit; display: block;">
+                    <div class="card-image">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                        {% else %}
+                            <img src="https://via.placeholder.com/300x300?text=VapeLand" alt="No image">
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <span class="card-category">{{ product.category.name }}</span>
+                        <h3 class="card-name">{{ product.name }}</h3>
+                        <span class="price-tag">{{ product.price|floatformat:0 }} РіСЂРЅ</span>
+                    </div>
+                </a>
+                <div class="card-footer">
+                    <button onclick="addToCart('{{ product.id }}')" class="btn-primary" style="width: 100%;">РЈ РљРћРЁРРљ</button>
+                </div>
+            </div>
+            {% empty %}
+            <p style="color: var(--text-gray); text-align: center; grid-column: 1/-1;">РўРѕРІР°СЂРё СЃРєРѕСЂРѕ Р·'СЏРІР»СЏС‚СЊСЃСЏ...</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <footer id="contact" class="site-footer">
+        <div class="container footer-shell">
+            <div class="footer-brand">
+                <div class="logo" style="justify-content: center;">VAPE <span>LAND</span></div>
+                <p>VapeLand Сѓ Рј.РњРёРєРѕР»Р°С—РІ: С€РІРёРґРєРёР№ РІРёР±С–СЂ POD-СЃРёСЃС‚РµРј, РєР°СЂС‚СЂРёРґР¶С–РІ, СЂС–РґРёРЅ С‚Р° Р°РєСЃРµСЃСѓР°СЂС–РІ Сѓ С”РґРёРЅРѕРјСѓ neon-РїСЂРѕСЃС‚РѕСЂС–.</p>
+            </div>
+            <div class="footer-grid">
+                <div class="footer-card">
+                    <span class="footer-label">РњР†РЎРўРћ</span>
+                    <strong>Рј.РњРёРєРѕР»Р°С—РІ</strong>
+                    <p>РЎР°РјРѕРІРёРІС–Р· С‚Р° РѕРїРµСЂР°С‚РёРІРЅР° РґРѕСЃС‚Р°РІРєР° РїРѕ РјС–СЃС‚Сѓ.</p>
+                </div>
+                <div class="footer-card">
+                    <span class="footer-label">Р“Р РђР¤Р†Рљ</span>
+                    <strong>09:00-20:00</strong>
+                    <p>РџСЂР°С†СЋС”РјРѕ С‰РѕРґРЅСЏ Р±РµР· РІРёС…С–РґРЅРёС….</p>
+                </div>
+            </div>
+            <div class="footer-links">
+                <a href="https://t.me/deepsmokeds" target="_blank">Telegram</a>
+                <a href="{% url 'discounts' %}">Р—РЅРёР¶РєРё</a>
+                <a href="https://www.instagram.com/deepshop.ds?igsh=a3ZvdTZvazQ0bWZx" target="_blank">Instagram</a>
+            </div>
+            <p class="footer-copy">В© 2026 VapeLand. 18+</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('loginModal');
+            const btns = document.querySelectorAll('.nav-cta');
+            const span = document.querySelector('.close-modal');
+            const catalogPanel = document.getElementById('catalog-panel');
+            const catalogTrigger = document.getElementById('catalog-trigger');
+            const catalogDetail = document.getElementById('catalog-detail');
+            const catalogButtons = Array.from(document.querySelectorAll('[data-catalog-target]'));
+            const catalogPanes = Array.from(document.querySelectorAll('[data-catalog-pane]'));
+            const desktopCatalog = window.matchMedia('(min-width: 980px)');
+            let activeCatalogKey = null;
+
+            btns.forEach(btn => {
+                btn.onclick = (event) => {
+                    event.preventDefault();
+                    modal.style.display = 'flex';
+                };
+            });
+
+            if (span) {
+                span.onclick = () => {
+                    modal.style.display = 'none';
+                };
+            }
+
+            window.onclick = (event) => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            };
+
+            window.addToCart = function(productId) {
+                fetch(`/cart/add/${productId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'ok') {
+                            document.getElementById('cart-count').innerText = data.cart_count;
+                            location.reload();
+                        }
+                    });
+            };
+
+            if (!catalogPanel || !catalogTrigger || !catalogDetail || !catalogButtons.length || !catalogPanes.length) {
+                return;
+            }
+
+            const openCatalog = (key) => {
+                activeCatalogKey = key;
+                catalogPanel.classList.add('is-expanded');
+                catalogTrigger.setAttribute('aria-expanded', 'true');
+                catalogDetail.setAttribute('aria-hidden', 'false');
+
+                catalogButtons.forEach((button) => {
+                    const isActive = button.dataset.catalogTarget === key;
+                    button.classList.toggle('is-active', isActive);
+                    button.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+                });
+
+                catalogPanes.forEach((pane) => {
+                    pane.classList.toggle('is-active', pane.dataset.catalogPane === key);
+                });
+            };
+
+            const closeCatalog = () => {
+                activeCatalogKey = null;
+                catalogPanel.classList.remove('is-expanded');
+                catalogTrigger.setAttribute('aria-expanded', 'false');
+                catalogDetail.setAttribute('aria-hidden', 'true');
+
+                catalogButtons.forEach((button) => {
+                    button.classList.remove('is-active');
+                    button.setAttribute('aria-expanded', 'false');
+                });
+
+                catalogPanes.forEach((pane) => {
+                    pane.classList.remove('is-active');
+                });
+            };
+
+            catalogButtons.forEach((button, index) => {
+                const key = button.dataset.catalogTarget;
+
+                button.addEventListener('mouseenter', () => {
+                    if (desktopCatalog.matches) {
+                        openCatalog(key);
+                    }
+                });
+
+                button.addEventListener('focus', () => {
+                    openCatalog(key);
+                });
+
+                button.addEventListener('click', () => {
+                    if (!desktopCatalog.matches) {
+                        catalogPanel.classList.add('is-mobile-open');
+                    }
+
+                    if (activeCatalogKey === key && catalogPanel.classList.contains('is-expanded')) {
+                        closeCatalog();
+                        return;
+                    }
+
+                    openCatalog(key);
+                });
+
+                if (index === 0) {
+                    button.dataset.catalogDefault = 'true';
+                }
+            });
+
+            catalogPanel.addEventListener('mouseleave', () => {
+                if (desktopCatalog.matches) {
+                    closeCatalog();
+                }
+            });
+
+            catalogTrigger.addEventListener('click', () => {
+                if (desktopCatalog.matches) {
+                    if (catalogPanel.classList.contains('is-expanded')) {
+                        closeCatalog();
+                    } else {
+                        openCatalog(catalogButtons[0].dataset.catalogTarget);
+                    }
+                    return;
+                }
+
+                catalogPanel.classList.toggle('is-mobile-open');
+                if (!catalogPanel.classList.contains('is-mobile-open')) {
+                    closeCatalog();
+                } else if (!activeCatalogKey) {
+                    openCatalog(catalogButtons[0].dataset.catalogTarget);
+                }
+            });
+
+            const handleCatalogViewport = () => {
+                if (desktopCatalog.matches) {
+                    catalogPanel.classList.remove('is-mobile-open');
+                    closeCatalog();
+                }
+            };
+
+            if (desktopCatalog.addEventListener) {
+                desktopCatalog.addEventListener('change', handleCatalogViewport);
+            } else {
+                desktopCatalog.addListener(handleCatalogViewport);
+            }
+        });
+    </script>
+</body>
+</html>
+

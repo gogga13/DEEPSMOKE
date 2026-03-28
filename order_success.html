@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Замовлення прийнято | VapeLand</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}?v=20260326-1">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: var(--bg-black);
+            margin: 0;
+            overflow: hidden;
+        }
+        .success-card {
+            text-align: center;
+            padding: 60px 40px;
+        }
+        .checkmark-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(90deg, var(--accent-pink), var(--accent-purple));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            box-shadow: 0 0 30px rgba(217, 70, 239, 0.4);
+        }
+        .success-title {
+            font-family: var(--font-title);
+            font-size: 3rem;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+        .success-text {
+            color: var(--text-gray);
+            font-size: 1.1rem;
+            max-width: 400px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="glow-bg"></div>
+
+    <div class="container">
+        <div class="auth-card success-card animate-fade">
+            <!-- Іконка успіху -->
+            <div class="checkmark-icon">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5 13L9 17L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+
+            <div class="logo" style="margin-bottom: 20px; display: inline-block;">VAPE <span>LAND</span></div>
+            
+            <h1 class="success-title">Дякуємо!</h1>
+            
+            <p class="success-text">
+                Ваше замовлення прийнято. <br>
+                <strong>Менеджер зв'яжеться з вами протягом 5 хвилин</strong> для підтвердження деталей доставки.
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <a href="/" class="btn-primary" style="text-decoration: none;">ПОВЕРНУТИСЯ НА ГОЛОВНУ</a>
+                <a href="https://t.me/deepsmokeds" target="_blank" class="btn-ghost" style="text-decoration: none; border-color: #444;">ПЕРЕЙТИ В TELEGRAM</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

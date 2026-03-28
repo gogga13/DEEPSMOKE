@@ -1,0 +1,42 @@
+{% load static %}
+{% load socialaccount %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Вхід | VapeLand</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}?v=20260326-1">
+</head>
+<body class="auth-page">
+    <div class="glow-bg"></div>
+    <div class="container auth-container">
+        <div class="auth-card animate-fade">
+            <a href="/" class="logo" style="margin-bottom: 30px; display: inline-block;">VAPE <span>LAND</span></a>
+            
+            <h1 style="font-family: var(--font-title); font-size: 2.5rem; margin-bottom: 10px;">Вхід у <span>акаунт</span></h1>
+            
+            <!-- Кнопка Google (найважливіша) -->
+            <a href="{% provider_login_url 'google' %}" class="auth-btn google-btn" style="margin-bottom: 20px; background: white; color: black; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; border-radius: 50px; text-decoration: none; font-weight: 600;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_Logo.svg" alt="Google" style="width: 20px;">
+                Увійти через Google
+            </a>
+
+            <div class="divider-text" style="margin-block: 20px; color: #444;">або за логіном</div>
+
+            <form method="POST" action="{% url 'account_login' %}" class="signup-form">
+                {% csrf_token %}
+                {% if form.errors %}
+                    <p style="color: #ff4444; font-size: 0.8rem;">Невірний логін або пароль</p>
+                {% endif %}
+                <input type="text" name="login" placeholder="Логін" required class="input-field" style="width: 100%; margin-bottom: 15px;">
+                <input type="password" name="password" placeholder="Пароль" required class="input-field" style="width: 100%; margin-bottom: 20px;">
+                <button type="submit" class="btn-primary" style="width: 100%;">Увійти</button>
+            </form>
+
+            <p style="margin-top: 30px; font-size: 0.9rem;">
+                Немає акаунта? <a href="{% url 'account_signup' %}" style="color: var(--accent-pink); text-decoration: none;">Зареєструватися</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

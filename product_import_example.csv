@@ -1,0 +1,5 @@
+id,category,name,brand,sku,description,price,image,is_active,variant_names,variant_images
+,Pod system,Vaporesso XROS 4,Vaporesso,XROS4,POD system with 1000mAh battery and fast charge,1299.00,,1,Black|Silver|Blue,products/variants/xros4-black.jpg|products/variants/xros4-silver.jpg|products/variants/xros4-blue.jpg
+,Liquids,Chaser Salt 30ml,Chaser,CHASER-SALT-30,Fruit vape liquid 30ml,350.00,,1,Berry Mix|Mint|Mango,
+,Disposables,Elf Bar BC5000,Elf Bar,ELFBAR-BC5000,Disposable vape line,420.00,,1,Strawberry|Watermelon|Blue Razz,
+,Cartridge,Vaporesso XROS Cartridge,Vaporesso,XROS-CART-08,Replacement cartridge 0.8 ohm for XROS,180.00,,1,0.6 ohm|0.8 ohm|1.0 ohm,

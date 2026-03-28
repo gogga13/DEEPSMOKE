@@ -1,0 +1,132 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.name }} | VapeLand</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}?v=20260326-1">
+    <style>
+        .product-page { padding-top: 120px; padding-bottom: 80px; text-align: left; }
+        .variant-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-block: 20px; }
+        .variant-item {
+            border: 1px solid var(--border);
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 0.8rem;
+        }
+        .variant-item:hover { border-color: var(--accent-pink); background: rgba(217, 70, 239, 0.05); }
+        .compatible-list { display: grid; gap: 10px; margin-top: 20px; }
+        .comp-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #111;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            text-decoration: none;
+            color: white;
+        }
+        .comp-card img { width: 50px; height: 50px; object-fit: contain; }
+    </style>
+</head>
+<body style="display: block; background: var(--bg-black);">
+    <div class="glow-bg"></div>
+
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">VAPE <span>LAND</span></a>
+            <a href="/" class="btn-ghost">← НА ГОЛОВНУ</a>
+        </div>
+    </nav>
+
+    <div class="container product-page">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px;">
+            <div class="auth-card" style="max-width: 100%; display: flex; align-items: center; justify-content: center;">
+                {% if product.image %}
+                <img id="main-img" src="{{ product.image.url }}" style="width: 100%; max-height: 450px; object-fit: contain;">
+                {% else %}
+                <img id="main-img" src="https://via.placeholder.com/600x600?text=VapeLand" style="width: 100%; max-height: 450px; object-fit: contain;">
+                {% endif %}
+            </div>
+
+            <div>
+                <p style="color: var(--accent-pink); letter-spacing: 2px; font-size: 0.8rem;">BRAND: {{ product.brand|default:"PREMIUM"|upper }}</p>
+                <h1 style="font-family: var(--font-title); font-size: 3rem; margin-block: 15px;">{{ product.name }}</h1>
+                <h2 style="font-size: 2rem; margin-bottom: 30px;">{{ product.price|floatformat:0 }} грн</h2>
+
+                {% if variants %}
+                <p style="font-weight: bold; font-size: 0.8rem;">ОБЕРІТЬ ВАРІАНТ:</p>
+                <div class="variant-grid">
+                    {% for v in variants %}
+                    <div class="variant-item" {% if v.image %}onclick="document.getElementById('main-img').src='{{ v.image.url }}'"{% endif %}>
+                        {{ v.name }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <button onclick="addToCart('{{ product.id }}')" class="btn-primary" style="width: 100%; margin-top: 20px;">ДОДАТИ В КОШИК</button>
+
+                {% if compatible %}
+                <div style="margin-top: 50px;">
+                    <p style="color: var(--accent-pink); font-size: 0.8rem; font-weight: bold;">СУПУТНІ ТОВАРИ:</p>
+                    <div class="compatible-list">
+                        {% for comp in compatible %}
+                        <a href="{% url 'product_detail' comp.pk %}" class="comp-card">
+                            {% if comp.image %}
+                            <img src="{{ comp.image.url }}" alt="{{ comp.name }}">
+                            {% else %}
+                            <img src="https://via.placeholder.com/100x100?text=VapeLand" alt="{{ comp.name }}">
+                            {% endif %}
+                            <div>
+                                <p style="font-size: 0.85rem; margin: 0;">{{ comp.name }}</p>
+                                <p style="color: var(--accent-pink); font-size: 0.8rem; margin: 0;">{{ comp.price|floatformat:0 }} грн</p>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="margin-top: 100px;">
+            <h2 class="section-title">Схожі <span>пропозиції</span></h2>
+            <div class="product-grid" style="margin-top: 30px;">
+                {% for item in similar %}
+                <div class="product-card">
+                    <a href="{% url 'product_detail' item.pk %}" style="text-decoration: none; color: inherit;">
+                        <div class="card-image">
+                            {% if item.image %}
+                            <img src="{{ item.image.url }}" alt="{{ item.name }}">
+                            {% else %}
+                            <img src="https://via.placeholder.com/300x300?text=VapeLand" alt="{{ item.name }}">
+                            {% endif %}
+                        </div>
+                        <div class="card-body"><h3>{{ item.name }}</h3></div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function addToCart(productId) {
+            fetch(`/cart/add/${productId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        alert("Додано!");
+                        location.reload();
+                    }
+                });
+        }
+    </script>
+</body>
+</html>

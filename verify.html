@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Підтвердження | VapeLand</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}?v=20260326-1">
+</head>
+<body class="auth-page">
+    <div class="glow-bg"></div>
+    <div class="container auth-container">
+        <div class="auth-card animate-fade">
+            <div class="logo" style="margin-bottom: 30px;">VAPE <span>LAND</span></div>
+            <h1 style="font-family: var(--font-title); font-size: 2.5rem; margin-bottom: 10px;">Введіть <span>код</span></h1>
+            <p style="color: var(--text-gray); margin-bottom: 30px;">Ми надіслали 4-значний код на ваш номер.</p>
+
+            <div class="input-group">
+                <input type="text" id="verification_code" placeholder="0 0 0 0" 
+                       style="letter-spacing: 15px; font-size: 2.5rem; text-align: center;" class="input-field">
+            </div>
+
+            <button id="confirm_btn" class="btn-primary" style="width: 100%; margin-top: 30px;">
+                ПІДТВЕРДИТИ
+            </button>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/imask"></script>
+    <script>
+        IMask(document.getElementById('verification_code'), { mask: '0 0 0 0' });
+
+        document.getElementById('confirm_btn').onclick = function() {
+            const code = document.getElementById('verification_code').value.replace(/\s/g, "");
+            if (code === "7777") {
+                window.location.href = "{% url 'profile' %}";
+            } else {
+                alert("Невірний код! Спробуйте 7777");
+            }
+        };
+    </script>
+</body>
+</html>

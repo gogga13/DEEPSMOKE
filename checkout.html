@@ -1,0 +1,138 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Оформлення замовлення | VapeLand</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}?v=20260326-1">
+</head>
+<body class="auth-page" style="display: block; background: var(--bg-black);">
+    <div class="glow-bg"></div>
+
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">VAPE <span>LAND</span></a>
+            <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+                <a href="{% url 'discounts' %}" class="btn-ghost">УМОВИ ЗНИЖОК</a>
+                <a href="{% url 'cart_detail' %}" class="btn-ghost">← ДО КОШИКА</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="padding-top: 100px; padding-bottom: 80px;">
+        <h1 class="section-title">Оформлення <span>замовлення</span></h1>
+
+        <div class="order-layout" style="margin-top: 40px;">
+            <div class="auth-card" style="text-align: left; max-width: 100%;">
+                <h3 style="color: var(--accent-pink); margin: 0 0 24px;">1. Покупець</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="input-group">
+                        <label>Ім'я</label>
+                        <input type="text" value="{{ user.first_name }}" class="input-field" readonly>
+                    </div>
+                    <div class="input-group">
+                        <label>Прізвище</label>
+                        <input type="text" value="{{ user.last_name }}" class="input-field" readonly>
+                    </div>
+                </div>
+                <div class="input-group" style="margin-top: 20px;">
+                    <label>Телефон</label>
+                    <input type="text" value="{{ user.profile.phone }}" class="input-field" readonly>
+                </div>
+
+                <h3 style="color: var(--accent-pink); margin: 34px 0 20px;">2. Доставка</h3>
+                <div class="notice-box">
+                    <strong>Адреса доставки</strong>
+                    <p>📍 {{ user.profile.city }}, {{ user.profile.address }}</p>
+                    <span>{{ pricing.delivery_label }}</span>
+                </div>
+                <a href="{% url 'profile' %}" style="color: var(--text-gray); font-size: 0.86rem;">Змінити адресу в профілі</a>
+
+                <h3 style="color: var(--accent-pink); margin: 34px 0 20px;">3. Умови дня народження</h3>
+                <div class="notice-box">
+                    <strong>Бонус 150 грн</strong>
+                    <p>Діє за 7 днів до дня народження та 7 днів після нього. Менеджер перевіряє документи перед фінальним підтвердженням.</p>
+                </div>
+            </div>
+
+            <div class="auth-card" style="max-width: 100%; text-align: left; position: sticky; top: 100px;">
+                <h3 style="margin-top: 0; margin-bottom: 20px;">Ваше замовлення</h3>
+                {% for item in cart_items %}
+                <div class="summary-row" style="padding: 0 0 10px; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 10px;">
+                    <span>{{ item.product.name }} x{{ item.quantity }}</span>
+                    <strong>{{ item.total|floatformat:0 }} грн</strong>
+                </div>
+                {% endfor %}
+
+                <form method="POST" action="{% url 'place_order' %}" id="checkout-form">
+                    {% csrf_token %}
+                    <div class="summary-list" style="margin-top: 20px;">
+                        <div class="summary-row">
+                            <span>Сума товарів</span>
+                            <strong id="subtotal-value">{{ pricing.subtotal|floatformat:0 }} грн</strong>
+                        </div>
+                        <div class="summary-row">
+                            <span>{{ pricing.percent_label }}</span>
+                            <strong id="percent-discount-value">-{% if pricing.percent_discount > 0 %}{{ pricing.percent_discount|floatformat:0 }}{% else %}0{% endif %} грн</strong>
+                        </div>
+                        <div class="summary-row" id="birthday-row" style="display: none;">
+                            <span>Бонус до дня народження</span>
+                            <strong id="birthday-discount-value">-150 грн</strong>
+                        </div>
+                        <div class="summary-row">
+                            <span>Доставка</span>
+                            <strong>{{ pricing.delivery_label }}</strong>
+                        </div>
+                        <div class="summary-row summary-row--total">
+                            <span>До сплати</span>
+                            <strong id="final-total-value">{{ pricing.final_total|floatformat:0 }} грн</strong>
+                        </div>
+                    </div>
+
+                    <label class="checkbox-row" style="margin-top: 22px;">
+                        <input type="checkbox" name="birthday_bonus_ack" id="birthday_bonus_ack">
+                        <span>Підтверджую, що день народження був, є сьогодні або буде протягом 7 днів, і погоджуюся, що менеджер перевірить документи перед підтвердженням бонусу 150 грн.</span>
+                    </label>
+
+                    <p class="summary-note">Якщо чекбокс активовано, бот передасть менеджеру запит на перевірку документів і попередню суму бонусу.</p>
+
+                    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 24px; font-size: 1rem;">
+                        ПІДТВЕРДИТИ ЗАМОВЛЕННЯ
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const birthdayCheckbox = document.getElementById('birthday_bonus_ack');
+            const birthdayRow = document.getElementById('birthday-row');
+            const birthdayDiscountValue = document.getElementById('birthday-discount-value');
+            const finalTotalValue = document.getElementById('final-total-value');
+            const baseFinalTotal = Number('{{ pricing.final_total }}'.replace(',', '.'));
+            const birthdayBonus = 150;
+
+            if (!birthdayCheckbox || !birthdayRow || !finalTotalValue) {
+                return;
+            }
+
+            const formatMoney = (value) => `${Math.max(0, value).toFixed(0)} грн`;
+
+            const syncTotals = () => {
+                if (birthdayCheckbox.checked) {
+                    birthdayRow.style.display = 'flex';
+                    birthdayDiscountValue.textContent = `-${birthdayBonus} грн`;
+                    finalTotalValue.textContent = formatMoney(baseFinalTotal - birthdayBonus);
+                } else {
+                    birthdayRow.style.display = 'none';
+                    finalTotalValue.textContent = formatMoney(baseFinalTotal);
+                }
+            };
+
+            birthdayCheckbox.addEventListener('change', syncTotals);
+            syncTotals();
+        })();
+    </script>
+</body>
+</html>

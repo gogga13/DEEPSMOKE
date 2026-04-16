@@ -1,0 +1,24 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профіль активний | VapeLand</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}?v=20260330-3">
+</head>
+<body class="auth-page">
+    <div class="glow-bg"></div>
+    <div class="container auth-container">
+        <div class="auth-card animate-fade">
+            <div class="logo" style="margin-bottom: 30px;">VAPE <span>LAND</span></div>
+            <h1 style="font-family: var(--font-title); font-size: 2.5rem; margin-bottom: 10px;">Ваш <span>профіль</span> активний</h1>
+            <p style="color: var(--text-gray); margin-bottom: 30px;">Додаткова верифікація зараз не потрібна. Можна перейти до профілю або в каталог.</p>
+            <div style="display: grid; gap: 14px;">
+                <a href="{% url 'profile' %}" class="btn-primary" style="text-decoration: none;">ПЕРЕЙТИ В ПРОФІЛЬ</a>
+                <a href="{% url 'catalog_page' %}" class="btn-ghost" style="text-decoration: none;">ВІДКРИТИ КАТАЛОГ</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

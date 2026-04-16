@@ -1,0 +1,78 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мої замовлення | VapeLand</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}?v=20260413-8">
+</head>
+<body style="display: block; background: var(--bg-black);">
+    <div class="glow-bg"></div>
+
+    {% include 'includes/site_header.html' %}
+
+    <section class="section container" style="padding-top: 0;">
+        <div class="section-header" style="margin-bottom: 26px;">
+            <p class="section-kicker">Profile</p>
+            <h1 class="section-title">Мої <span>замовлення</span></h1>
+            <p class="section-copy">Тут зберігається історія ваших замовлень, статуси та склад кожної покупки.</p>
+        </div>
+
+        {% if orders %}
+        <div class="auth-card" style="max-width: 100%; text-align: left;">
+            {% for order in orders %}
+            <div class="order-history-card">
+                <div class="order-history-card__head">
+                    <div>
+                        <strong>Замовлення #{{ order.id }}</strong>
+                        <p class="summary-note" style="margin: 6px 0 0;">{{ order.created_at|date:"d.m.Y H:i" }}</p>
+                    </div>
+                    <div class="order-history-card__meta">
+                        <span class="status-badge status-badge--{{ order.status }}">{{ order.get_status_display }}</span>
+                        <strong>{{ order.total_price|floatformat:0 }} грн</strong>
+                    </div>
+                </div>
+
+                <div class="order-history-items">
+                    {% for item in order.items.all %}
+                    <div class="summary-row" style="padding: 0 0 10px; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 10px;">
+                        <div>
+                            <strong>{{ item.product_name }}</strong>
+                            <p class="summary-note" style="margin: 6px 0 0;">
+                                Варіант: {{ item.variant_name }} · Кількість: {{ item.quantity }}
+                                {% if item.glycerin_price > 0 %}
+                                · Гліцерин: {{ item.glycerin_price|floatformat:0 }} грн
+                                {% endif %}
+                            </p>
+                        </div>
+                        <strong>{{ item.line_total|floatformat:0 }} грн</strong>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% if order.comment %}
+                <div style="margin-top: 16px; padding: 14px 16px; border-radius: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(0,229,255,0.12);">
+                    <p class="section-kicker" style="margin: 0 0 8px; font-size: 0.72rem;">Коментар адміністратора</p>
+                    <p class="summary-note" style="margin: 0; color: #d9e3f4; line-height: 1.6;">{{ order.comment }}</p>
+                </div>
+                {% endif %}
+            </div>
+            {% if not forloop.last %}<div style="height: 18px;"></div>{% endif %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="auth-card" style="max-width: 100%; text-align: center;">
+            <h2 style="margin-bottom: 14px;">Замовлень поки немає</h2>
+            <p class="summary-note" style="margin-bottom: 22px;">Після першої покупки тут з'явиться вся історія ваших замовлень.</p>
+            <a href="{% url 'catalog_page' %}" class="btn-primary">Перейти в каталог</a>
+        </div>
+        {% endif %}
+    </section>
+
+    {% include 'includes/support_widget.html' %}
+</body>
+</html>
+
+
+

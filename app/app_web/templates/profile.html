@@ -1,0 +1,301 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мій профіль | VapeLand</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}?v=20260413-8">
+    <style>
+        body { display: block; min-height: 100vh; background-color: var(--bg-black); margin: 0; color: white; }
+        .profile-content { display: flex; align-items: center; justify-content: center; padding: 34px 20px 60px; }
+        .profile-card { max-width: 760px; width: 100%; text-align: left; }
+        .profile-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+        .profile-card .input-group { margin-top: 18px; text-align: left; position: relative; }
+        .profile-card .input-group label {
+            color: var(--accent-pink);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: block;
+            letter-spacing: 1px;
+        }
+        .profile-actions { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(220px, 0.8fr); gap: 16px; margin-top: 32px; align-items: stretch; }
+        .profile-actions button, .profile-actions a, .profile-actions form { width: 100%; }
+        .profile-actions form { margin: 0; }
+        .profile-actions .btn-secondary { width: 100%; }
+        .profile-actions .btn-primary,
+        .profile-actions .btn-logout { min-height: 54px; }
+        .profile-actions .btn-logout { height: 100%; }
+        .np-results {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, rgba(10, 15, 29, 0.98), rgba(7, 10, 18, 0.98));
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            border-radius: 18px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 0, 212, 0.12);
+            z-index: 30;
+            max-height: 260px;
+            overflow-y: auto;
+            display: none;
+        }
+        .np-results.is-open { display: block; }
+        .np-item {
+            padding: 14px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            color: white;
+            font-size: 0.92rem;
+            transition: 0.2s ease;
+        }
+        .np-item:last-child { border-bottom: 0; }
+        .np-item:hover { background: rgba(255, 0, 212, 0.08); color: var(--accent-cyan); }
+        .np-hint { margin-top: 6px; color: var(--text-muted); font-size: 0.78rem; }
+        @media (max-width: 760px) {
+            .profile-grid, .profile-actions { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="glow-bg"></div>
+
+    {% include 'includes/site_header.html' %}
+
+    <div class="profile-content">
+        <div class="auth-card profile-card animate-fade">
+            <h1 style="font-family: var(--font-title); font-size: 2.5rem; margin-bottom: 10px; text-transform: uppercase; text-align: center;">Особистий <span>кабінет</span></h1>
+            <p style="text-align: center; color: var(--text-gray); margin-bottom: 30px; font-size: 0.9rem;">Клієнт: {{ user.username }}</p>
+
+            {% if messages %}
+            <div class="messages-stack">
+                {% for message in messages %}
+                <div class="message-chip">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if form.errors %}
+            <div class="error-msg" style="text-align: left;">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                    <p>{{ error }}</p>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="POST" autocomplete="off">
+                {% csrf_token %}
+
+                <div class="profile-grid">
+                    <div class="input-group">
+                        <label>{{ form.first_name.label }}</label>
+                        {{ form.first_name }}
+                    </div>
+                    <div class="input-group">
+                        <label>{{ form.last_name.label }}</label>
+                        {{ form.last_name }}
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>{{ form.patronymic.label }}</label>
+                    {{ form.patronymic }}
+                </div>
+
+                <div class="input-group">
+                    <label>{{ form.email.label }}</label>
+                    {{ form.email }}
+                </div>
+
+                <div class="profile-grid">
+                    <div class="input-group">
+                        <label>{{ form.phone.label }}</label>
+                        {{ form.phone }}
+                    </div>
+                    <div class="input-group">
+                        <label>{{ form.birth_date.label }}</label>
+                        <input
+                            type="date"
+                            name="birth_date"
+                            id="id_birth_date"
+                            class="input-field"
+                            value="{% if form.is_bound %}{{ form.data.birth_date }}{% else %}{{ form.instance.birth_date|date:'Y-m-d' }}{% endif %}"
+                        >
+                        {% if form.birth_date.errors %}
+                        <div class="field-errors">
+                            {% for error in form.birth_date.errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="profile-grid">
+                    <div class="input-group">
+                        <label>{{ form.city.label }}</label>
+                        {{ form.city }}
+                        <div id="city-results" class="np-results"></div>
+                        <div class="np-hint">Почніть вводити назву міста та оберіть потрібний варіант зі списку.</div>
+                    </div>
+                    <div class="input-group">
+                        <label>{{ form.address.label }}</label>
+                        {{ form.address }}
+                        <div id="warehouse-results" class="np-results"></div>
+                        <div class="np-hint">Після вибору міста знайдіть відділення або поштомат Нової Пошти.</div>
+                    </div>
+                </div>
+
+                <p class="summary-note">Дата народження потрібна для автоматичної перевірки бонусу 150 грн саме в день народження.</p>
+
+                <div class="profile-actions">
+                    <button type="submit" class="btn-primary">ЗБЕРЕГТИ ЗМІНИ</button>
+                    <form method="post" action="{% url 'account_logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-logout">ВИЙТИ</button>
+                    </form>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% include 'includes/support_widget.html' %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const cityInput = document.getElementById('id_city');
+            const warehouseInput = document.getElementById('id_address');
+            const cityResults = document.getElementById('city-results');
+            const warehouseResults = document.getElementById('warehouse-results');
+            const citiesUrl = "{% url 'search_np_cities' %}";
+            const warehousesUrl = "{% url 'search_np_warehouses' %}";
+
+            let selectedCityRef = '';
+            let cityTimer = null;
+            let warehouseTimer = null;
+
+            const closeDropdown = (dropdown) => {
+                dropdown.innerHTML = '';
+                dropdown.classList.remove('is-open');
+            };
+
+            const openDropdown = (dropdown) => {
+                dropdown.classList.add('is-open');
+            };
+
+            const renderItems = (dropdown, items, onSelect) => {
+                dropdown.innerHTML = '';
+                if (!items.length) {
+                    closeDropdown(dropdown);
+                    return;
+                }
+
+                items.forEach((item) => {
+                    const option = document.createElement('div');
+                    option.className = 'np-item';
+                    option.textContent = item.name;
+                    option.addEventListener('click', () => onSelect(item));
+                    dropdown.appendChild(option);
+                });
+                openDropdown(dropdown);
+            };
+
+            const fetchJson = (url) => fetch(url, { credentials: 'same-origin' }).then((response) => {
+                if (!response.ok) {
+                    throw new Error('Request failed');
+                }
+                return response.json();
+            });
+
+            const resolveCityRefByName = (cityName) => {
+                const normalized = (cityName || '').trim();
+                if (normalized.length < 2) {
+                    return Promise.resolve('');
+                }
+
+                return fetchJson(`${citiesUrl}?q=${encodeURIComponent(normalized)}`)
+                    .then((data) => {
+                        const exactMatch = (data.results || []).find((item) => item.name.toLowerCase() === normalized.toLowerCase());
+                        return exactMatch ? exactMatch.ref : '';
+                    })
+                    .catch(() => '');
+            };
+
+            cityInput?.addEventListener('input', () => {
+                selectedCityRef = '';
+                warehouseInput.value = '';
+                clearTimeout(cityTimer);
+
+                const query = cityInput.value.trim();
+                if (query.length < 2) {
+                    closeDropdown(cityResults);
+                    return;
+                }
+
+                cityTimer = setTimeout(() => {
+                    fetchJson(`${citiesUrl}?q=${encodeURIComponent(query)}`)
+                        .then((data) => {
+                            renderItems(cityResults, data.results || [], (item) => {
+                                cityInput.value = item.name;
+                                selectedCityRef = item.ref;
+                                warehouseInput.focus();
+                                closeDropdown(cityResults);
+                            });
+                        })
+                        .catch(() => closeDropdown(cityResults));
+                }, 250);
+            });
+
+            warehouseInput?.addEventListener('focus', async () => {
+                if (!selectedCityRef && cityInput.value.trim()) {
+                    selectedCityRef = await resolveCityRefByName(cityInput.value);
+                }
+            });
+
+            warehouseInput?.addEventListener('input', () => {
+                clearTimeout(warehouseTimer);
+
+                warehouseTimer = setTimeout(async () => {
+                    if (!selectedCityRef && cityInput.value.trim()) {
+                        selectedCityRef = await resolveCityRefByName(cityInput.value);
+                    }
+                    if (!selectedCityRef) {
+                        closeDropdown(warehouseResults);
+                        return;
+                    }
+
+                    const query = warehouseInput.value.trim();
+                    fetchJson(`${warehousesUrl}?city_ref=${encodeURIComponent(selectedCityRef)}&q=${encodeURIComponent(query)}`)
+                        .then((data) => {
+                            renderItems(warehouseResults, data.results || [], (item) => {
+                                warehouseInput.value = item.name;
+                                closeDropdown(warehouseResults);
+                            });
+                        })
+                        .catch(() => closeDropdown(warehouseResults));
+                }, 250);
+            });
+
+            document.addEventListener('click', (event) => {
+                if (!cityResults.contains(event.target) && event.target !== cityInput) {
+                    closeDropdown(cityResults);
+                }
+                if (!warehouseResults.contains(event.target) && event.target !== warehouseInput) {
+                    closeDropdown(warehouseResults);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+

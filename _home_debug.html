@@ -1,0 +1,679 @@
+﻿
+
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VapeLand | м. Миколаїв</title>
+    <link rel="stylesheet" href="/static/style.css?v=20260408-4">
+</head>
+<body>
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 style="font-family: var(--font-title); font-size: 2.2rem; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.08em;">Вхід у <span>VapeLand</span></h2>
+            <p style="color: var(--text-gray); margin: 0 0 30px;">Увійдіть у свій акаунт, щоб оформлювати замовлення ще швидше.</p>
+
+            <a href="/accounts/google/login/" class="auth-btn google-btn">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_Logo.svg" alt="Google">
+                Увійти через Google
+            </a>
+
+            <p style="margin-top: 25px; font-size: 1rem; color: var(--text-gray);">
+                Немає акаунта?
+                <a href="/accounts/signup/" style="color: var(--accent-pink); font-weight: 700; text-decoration: none;">Зареєструватися</a>
+            </p>
+        </div>
+    </div>
+
+    <div class="glow-bg"></div>
+
+    ﻿
+<nav class="navbar site-header">
+    <div class="container site-header__inner">
+        <div class="site-header__brand-column">
+            <a href="/" class="logo site-header__logo-link" aria-label="VapeLand">
+                <span class="site-header__logo-badge">
+                    <img src="/static/images/logo.png" alt="VapeLand" class="site-header__logo-image">
+                </span>
+                <span class="site-header__logo-wordmark">VAPE <span>LAND</span></span>
+            </a>
+            ﻿<div class="nav-search-shell">
+    <div class="search-widget" data-search-widget data-search-url="/search/" data-catalog-url="/catalog/">
+        <input
+            type="search"
+            class="search-input"
+            placeholder="Пошук товарів..."
+            autocomplete="off"
+            value=""
+            aria-label="Пошук товарів"
+        >
+        <span class="search-widget-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+                <circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.9"></circle>
+                <path d="M16 16L21 21" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"></path>
+            </svg>
+        </span>
+        <div class="search-dropdown" hidden style="display: none;"></div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('[data-search-widget]').forEach(function (widget) {
+            if (widget.dataset.ready === '1') {
+                return;
+            }
+            widget.dataset.ready = '1';
+
+            const input = widget.querySelector('.search-input');
+            const dropdown = widget.querySelector('.search-dropdown');
+            const searchUrl = widget.dataset.searchUrl;
+            const catalogUrl = widget.dataset.catalogUrl;
+            let debounceTimer = null;
+            let controller = null;
+
+            const closeDropdown = function () {
+                dropdown.hidden = true;
+                dropdown.style.display = 'none';
+                dropdown.innerHTML = '';
+                widget.classList.remove('is-open');
+            };
+
+            const openDropdown = function () {
+                dropdown.hidden = false;
+                dropdown.style.display = 'grid';
+                widget.classList.add('is-open');
+            };
+
+            const renderEmpty = function () {
+                dropdown.innerHTML = '<div class="search-empty">Нічого не знайдено</div>';
+                openDropdown();
+            };
+
+            const renderResults = function (items) {
+                dropdown.innerHTML = '';
+
+                if (!items.length) {
+                    renderEmpty();
+                    return;
+                }
+
+                items.forEach(function (item) {
+                    const result = document.createElement('a');
+                    result.className = 'search-result';
+                    result.href = item.url;
+
+                    const thumb = document.createElement('img');
+                    thumb.className = 'search-thumb';
+                    thumb.src = item.image;
+                    thumb.alt = item.name;
+
+                    const copy = document.createElement('div');
+                    copy.className = 'search-copy';
+
+                    const title = document.createElement('strong');
+                    title.textContent = item.name;
+
+                    const price = document.createElement('span');
+                    price.className = 'search-price';
+                    price.textContent = `${Number(item.price).toFixed(0)} грн`;
+
+                    copy.appendChild(title);
+                    copy.appendChild(price);
+                    result.appendChild(thumb);
+                    result.appendChild(copy);
+                    dropdown.appendChild(result);
+                });
+
+                openDropdown();
+            };
+
+            input.addEventListener('input', function () {
+                const query = input.value.trim();
+                clearTimeout(debounceTimer);
+
+                if (query.length < 2) {
+                    if (controller) {
+                        controller.abort();
+                    }
+                    closeDropdown();
+                    return;
+                }
+
+                debounceTimer = setTimeout(function () {
+                    if (controller) {
+                        controller.abort();
+                    }
+
+                    controller = new AbortController();
+                    fetch(`${searchUrl}?q=${encodeURIComponent(query)}`, { signal: controller.signal })
+                        .then(function (response) {
+                            if (!response.ok) {
+                                throw new Error('Search request failed');
+                            }
+                            return response.json();
+                        })
+                        .then(function (data) {
+                            renderResults(data.results || []);
+                        })
+                        .catch(function (error) {
+                            if (error.name !== 'AbortError') {
+                                closeDropdown();
+                            }
+                        });
+                }, 300);
+            });
+
+            input.addEventListener('focus', function () {
+                if (dropdown.children.length) {
+                    openDropdown();
+                }
+            });
+
+            input.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    const query = input.value.trim();
+                    if (!query) {
+                        return;
+                    }
+                    window.location.href = `${catalogUrl}?q=${encodeURIComponent(query)}`;
+                }
+            });
+
+            document.addEventListener('click', function (event) {
+                if (!widget.contains(event.target)) {
+                    closeDropdown();
+                }
+            });
+        });
+    });
+</script>
+
+        </div>
+
+        <ul class="nav-links site-header__actions">
+            <li class="cart-wrapper">
+                <a href="/cart/" class="nav-btn cart-btn cart-trigger">
+                    Кошик <span id="cart-count">0</span>
+                </a>
+                <div class="mini-cart">
+                    
+                        <p style="padding: 8px 0; color: var(--text-gray); text-align: center; font-size: 0.9rem; margin: 0;">Кошик порожній</p>
+                    
+                </div>
+            </li>
+            <li><a href="/catalog/" class="nav-btn">Каталог</a></li>
+            <li><a href="/discounts/" class="nav-btn">Знижки</a></li>
+            
+                <li><a href="/accounts/login/" class="nav-cta">18+ Вхід</a></li>
+            
+        </ul>
+    </div>
+</nav>
+
+<style>
+    .age-gate {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: 20px;
+        z-index: 99999;
+        isolation: isolate;
+    }
+
+    .age-gate[hidden] {
+        display: none !important;
+    }
+
+    .age-gate__backdrop {
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(180deg, rgba(3, 6, 12, 0.76), rgba(3, 6, 12, 0.84)),
+            radial-gradient(circle at 20% 20%, rgba(255, 0, 212, 0.12), transparent 34%),
+            radial-gradient(circle at 80% 12%, rgba(0, 229, 255, 0.12), transparent 30%);
+        backdrop-filter: blur(10px);
+    }
+
+    .age-gate__dialog {
+        position: relative;
+        width: min(680px, 100%);
+        padding: 34px 38px;
+        background: rgba(255, 255, 255, 0.985);
+        color: #111827;
+        border-radius: 28px;
+        border: 1px solid rgba(255, 255, 255, 0.78);
+        box-shadow: 0 34px 100px rgba(0, 0, 0, 0.42);
+    }
+
+    .age-gate__title {
+        margin: 0 0 18px;
+        font-size: clamp(2rem, 4vw, 2.35rem);
+        line-height: 1.15;
+        font-weight: 800;
+        color: #111827;
+    }
+
+    .age-gate__copy {
+        color: #283244;
+        font-size: 1rem;
+        line-height: 1.7;
+    }
+
+    .age-gate__copy strong {
+        color: #ff4d8d;
+    }
+
+    .age-gate__list {
+        margin: 12px 0 0;
+        padding-left: 24px;
+    }
+
+    .age-gate__links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .age-gate__links a {
+        color: #7a8092;
+        font-size: 0.98rem;
+        text-decoration: underline;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 4px;
+    }
+
+    .age-gate__actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 28px;
+    }
+
+    .age-gate__button {
+        min-height: 62px;
+        border-radius: 18px;
+        border: 1px solid transparent;
+        font-family: inherit;
+        font-size: 1.05rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease, background 220ms ease, color 220ms ease;
+    }
+
+    .age-gate__button:hover {
+        transform: translateY(-1px);
+    }
+
+    .age-gate__button--secondary {
+        background: #f3f4f6;
+        color: #111827;
+        border-color: rgba(15, 23, 42, 0.06);
+    }
+
+    .age-gate__button--secondary:hover {
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+    }
+
+    .age-gate__button--primary {
+        background: linear-gradient(135deg, #4f8cff, #5865f2);
+        color: #fff;
+        box-shadow: 0 14px 34px rgba(79, 140, 255, 0.28);
+    }
+
+    .age-gate__button--primary:hover {
+        box-shadow: 0 18px 40px rgba(79, 140, 255, 0.34);
+    }
+
+    body.age-gate-open {
+        overflow: hidden;
+    }
+
+    @media (max-width: 640px) {
+        .age-gate {
+            padding: 14px;
+        }
+
+        .age-gate__dialog {
+            padding: 24px 20px;
+            border-radius: 22px;
+        }
+
+        .age-gate__title {
+            font-size: 1.8rem;
+        }
+
+        .age-gate__links {
+            gap: 12px;
+            flex-direction: column;
+        }
+
+        .age-gate__actions {
+            grid-template-columns: 1fr;
+        }
+
+        .age-gate__button {
+            min-height: 58px;
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<div class="age-gate" data-age-gate>
+    <div class="age-gate__backdrop"></div>
+    <div class="age-gate__dialog" role="dialog" aria-modal="true" aria-labelledby="age-gate-title">
+        <h2 id="age-gate-title" class="age-gate__title">Вам виповнилося 18 років?</h2>
+        <div class="age-gate__copy">
+            <p>
+                Переходячи на сайт VapeLand, ви підтверджуєте, що вам вже виповнилося
+                <strong>18 років</strong> та ви ознайомлені з відповідальністю, пов'язаною з
+                купівлею та використанням електронних сигарет і рідин до них відповідно до
+                чинного законодавства України.
+            </p>
+            <ul class="age-gate__list">
+                <li>Продаж товарів для вейпінгу неповнолітнім заборонено.</li>
+                <li>Менеджер може запросити підтвердження віку під час оформлення замовлення.</li>
+                <li>Оформлюючи покупку, ви погоджуєтесь із правилами відповідального споживання.</li>
+            </ul>
+        </div>
+        <div class="age-gate__links">
+            <a href="/discounts/">Детальніше про вікові обмеження</a>
+            <a href="/discounts/">Відповідальне споживання</a>
+        </div>
+        <div class="age-gate__actions">
+            <button type="button" class="age-gate__button age-gate__button--secondary" data-age-gate-decline>
+                Ні, мені немає 18
+            </button>
+            <button type="button" class="age-gate__button age-gate__button--primary" data-age-gate-confirm>
+                Так, мені вже є 18
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const gate = document.querySelector("[data-age-gate]");
+    if (!gate || gate.dataset.ready === "1") {
+        return;
+    }
+    gate.dataset.ready = "1";
+
+    const confirmButton = gate.querySelector("[data-age-gate-confirm]");
+    const declineButton = gate.querySelector("[data-age-gate-decline]");
+    document.body.classList.add("age-gate-open");
+
+    const closeGate = function () {
+        gate.hidden = true;
+        gate.style.display = "none";
+        document.body.classList.remove("age-gate-open");
+    };
+
+    confirmButton.addEventListener("click", function () {
+        closeGate();
+    });
+
+    declineButton.addEventListener("click", function () {
+        window.location.href = "https://www.google.com/";
+    });
+});
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const dropdown = document.querySelector("[data-profile-dropdown]");
+    if (!dropdown) return;
+
+    const btn = dropdown.querySelector("[data-profile-toggle]");
+    const menu = dropdown.querySelector("[data-profile-menu]");
+
+    const closeMenu = function () {
+        dropdown.classList.remove("is-open");
+        btn.setAttribute("aria-expanded", "false");
+        menu.hidden = true;
+    };
+
+    const openMenu = function () {
+        dropdown.classList.add("is-open");
+        btn.setAttribute("aria-expanded", "true");
+        menu.hidden = false;
+    };
+
+    btn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        if (dropdown.classList.contains("is-open")) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+    });
+
+    menu.addEventListener("click", function (e) {
+        e.stopPropagation();
+    });
+
+    document.addEventListener("click", function (e) {
+        if (!dropdown.contains(e.target)) {
+            closeMenu();
+        }
+    });
+});
+</script>
+
+
+    <section class="hero-home container">
+        <div class="hero-panel animate-fade">
+            <div class="hero-copy">
+                <span class="hero-eyebrow">WELCOME TO VAPELAND</span>
+                <h1 class="hero-title">ВДИХАЙ <em>НЕОН</em><br>ОБИРАЙ <span>ХМАРУ</span></h1>
+                <p class="hero-subtitle">
+                    Преміальні POD-системи, картриджі та рідини для тих, хто любить яскравий смак і швидкий сервіс.
+                    Доставка по місту <strong>Миколаїв</strong> щодня з <strong>09:00 до 20:00</strong>.
+                </p>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <span>місто</span>
+                        <strong>м. Миколаїв</strong>
+                    </div>
+                    <div class="hero-stat">
+                        <span>графік</span>
+                        <strong>09:00-20:00</strong>
+                    </div>
+                    <div class="hero-stat">
+                        <span>формат</span>
+                        <strong>Безкоштовна доставка по місту Миколаїв</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="marquee-strip">
+        <div class="marquee-track">
+            <span>ELF BAR</span> <span class="dot">&bull;</span> <span>LOST MARY</span> <span class="dot">&bull;</span> <span>CHASER</span> <span class="dot">&bull;</span> <span>OXVA</span> <span class="dot">&bull;</span> <span>GEEKVAPE</span> <span class="dot">&bull;</span> <span>VAPORESSO</span> <span class="dot">&bull;</span> <span>VOOPOO</span> <span class="dot">&bull;</span>
+        </div>
+    </div>
+
+    <section class="section container">
+        <div class="section-header">
+            <p class="section-kicker">Top Picks</p>
+            <h2 class="section-title">Популярні <span>категорії</span></h2>
+            <p class="section-copy">Чотири головні напрямки VapeLand. Кожна картка веде в окремий каталог з актуальними товарами.</p>
+        </div>
+
+        <div class="popular-categories-grid">
+            
+            <a href="/catalog/?category=1" class="category-spotlight animate-fade" style="background-image: linear-gradient(180deg, rgba(5, 8, 18, 0.18), rgba(5, 8, 18, 0.9)), url('/media/categories/IMG_5543.JPG');">
+                <div class="category-spotlight-body">
+                    <span class="section-kicker" style="margin-bottom: 10px;">VapeLand</span>
+                    <h3>Pod-системи</h3>
+                    <ul class="category-spotlight-list">
+                        
+                        <li>Vaporesso XROS 4</li>
+                        
+                    </ul>
+                </div>
+            </a>
+            
+            <a href="/catalog/?category=2" class="category-spotlight animate-fade" style="background-image: linear-gradient(180deg, rgba(5, 8, 18, 0.18), rgba(5, 8, 18, 0.9)), url('/media/categories/IMG_5542_CrtpnBO.JPG');">
+                <div class="category-spotlight-body">
+                    <span class="section-kicker" style="margin-bottom: 10px;">VapeLand</span>
+                    <h3>Ароматизатори</h3>
+                    <ul class="category-spotlight-list">
+                        
+                        <li>Ароматизатор Alchemist 30ml</li>
+                        
+                        <li>Ароматизатор Aroma max 30ml</li>
+                        
+                        <li>Ароматизатор Aroma max Infinity 30ml</li>
+                        
+                        <li>Ароматизатор Black Limit 30ml</li>
+                        
+                    </ul>
+                </div>
+            </a>
+            
+            <a href="/catalog/?category=4" class="category-spotlight animate-fade" style="background-image: linear-gradient(180deg, rgba(5, 8, 18, 0.18), rgba(5, 8, 18, 0.9)), url('/media/categories/IMG_5543_fJFGDzp.JPG');">
+                <div class="category-spotlight-body">
+                    <span class="section-kicker" style="margin-bottom: 10px;">VapeLand</span>
+                    <h3>Картриджі</h3>
+                    <ul class="category-spotlight-list">
+                        
+                        <li>Асортимент оновлюється</li>
+                        
+                    </ul>
+                </div>
+            </a>
+            
+            <a href="/catalog/?category=3" class="category-spotlight animate-fade" style="background-image: linear-gradient(180deg, rgba(5, 8, 18, 0.18), rgba(5, 8, 18, 0.9)), url('/media/categories/IMG_5468.JPG');">
+                <div class="category-spotlight-body">
+                    <span class="section-kicker" style="margin-bottom: 10px;">VapeLand</span>
+                    <h3>Одноразові Под Системи</h3>
+                    <ul class="category-spotlight-list">
+                        
+                        <li>Асортимент оновлюється</li>
+                        
+                    </ul>
+                </div>
+            </a>
+            
+        </div>
+    </section>
+
+    <section class="section container">
+        <div class="section-header">
+            <p class="section-kicker">Service Reviews</p>
+            <h2 class="section-title">Відгуки <span>про VapeLand</span></h2>
+            <p class="section-copy">Реальні враження клієнтів про сервіс, швидкість доставки та підтримку.</p>
+        </div>
+        <div class="review-summary">
+            <div class="review-average">0,0</div>
+            <div>
+                <div class="review-stars">0 відгуків</div>
+                <div>Середня оцінка сервісу</div>
+            </div>
+        </div>
+        <div class="review-grid">
+            <div class="review-list">
+                
+                <p class="review-empty">Поки що немає схвалених відгуків про сервіс.</p>
+                
+            </div>
+            <div class="review-form-card">
+                <h3 style="margin-top: 0;">Залишити відгук про сайт</h3>
+                
+                <p class="review-empty">Щоб залишити відгук, увійдіть у свій акаунт.</p>
+                <a href="/accounts/login/" class="btn-ghost" style="text-decoration: none; width: 100%;">Увійти</a>
+                
+            </div>
+        </div>
+    </section>
+
+    <footer id="contact" class="site-footer">
+        <div class="container footer-shell">
+            <div class="footer-brand">
+                <div class="logo" style="justify-content: center;">VAPE <span>LAND</span></div>
+                <p>VapeLand у м. Миколаїв: швидкий вибір POD-систем, картриджів, рідин та аксесуарів у єдиному neon-просторі.</p>
+            </div>
+            <div class="footer-grid">
+                <div class="footer-card">
+                    <span class="footer-label">МІСТО</span>
+                    <strong>м. Миколаїв</strong>
+                    <p>Самовивіз та оперативна доставка по місту.</p>
+                </div>
+                <div class="footer-card">
+                    <span class="footer-label">ГРАФІК</span>
+                    <strong>09:00-20:00</strong>
+                    <p>Працюємо щодня без вихідних.</p>
+                </div>
+            </div>
+            <p class="footer-copy">&copy; 2026 VapeLand. 18+</p>
+        </div>
+    </footer>
+
+    <div class="support-widget" id="support-widget">
+    <button type="button" class="support-toggle" id="support-toggle" aria-expanded="false" aria-controls="support-panel">💬</button>
+    <div class="support-panel" id="support-panel">
+        <h3>Підтримка</h3>
+        <p>Якщо потрібна допомога з підбором товару або оформленням замовлення, напишіть нам у Telegram.</p>
+        <a href="https://t.me/your_support_username" target="_blank" rel="noopener" class="btn-primary" style="width: 100%; text-decoration: none;">Написати в Telegram</a>
+        <div class="support-phone">Телефон: скоро додамо</div>
+    </div>
+</div>
+<script>
+(function () {
+    const widget = document.getElementById('support-widget');
+    const toggle = document.getElementById('support-toggle');
+    if (!widget || !toggle) return;
+
+    toggle.addEventListener('click', function () {
+        const isOpen = widget.classList.toggle('is-open');
+        toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    document.addEventListener('click', function (event) {
+        if (!widget.contains(event.target)) {
+            widget.classList.remove('is-open');
+            toggle.setAttribute('aria-expanded', 'false');
+        }
+    });
+})();
+</script>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('loginModal');
+            const btns = document.querySelectorAll('.nav-cta');
+            const span = document.querySelector('.close-modal');
+
+            btns.forEach(btn => {
+                btn.onclick = (event) => {
+                    event.preventDefault();
+                    modal.style.display = 'flex';
+                };
+            });
+
+            if (span) {
+                span.onclick = () => {
+                    modal.style.display = 'none';
+                };
+            }
+
+            window.onclick = (event) => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            };
+        });
+    </script>
+</body>
+</html>
+
+

@@ -1,0 +1,134 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кошик | VapeLand</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}?v=20260413-8">
+</head>
+<body class="auth-page cart-page" style="display: block;">
+    <div class="glow-bg"></div>
+
+    {% include 'includes/site_header.html' %}
+
+    <div class="container" style="padding-top: 0; padding-bottom: 80px;">
+        <h1 class="section-title">Ваш <span>кошик</span></h1>
+
+        {% if messages %}
+        <div class="messages-stack" style="margin-top: 24px;">
+            {% for message in messages %}
+            <div class="message-chip">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if cart_items %}
+        <div class="order-layout" style="margin-top: 40px;">
+            <div class="auth-card" style="max-width: 100%; text-align: left;">
+                {% for item in cart_items %}
+                <div class="order-item-row">
+                    <div style="display: flex; align-items: center; gap: 18px; min-width: 0;">
+                        {% if item.product.image %}
+                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" style="width: 80px; height: 80px; object-fit: contain; border-radius: 18px; background: rgba(255,255,255,0.04); padding: 10px;">
+                        {% else %}
+                        <img src="https://via.placeholder.com/100x100?text=VapeLand" alt="{{ item.product.name }}" style="width: 80px; height: 80px; object-fit: contain; border-radius: 18px; background: rgba(255,255,255,0.04); padding: 10px;">
+                        {% endif %}
+                        <div style="min-width: 0;">
+                            <h3 style="margin: 0 0 6px;">{{ item.product.name }}</h3>
+                            <p style="color: var(--text-gray); margin: 0;">Варіант: {{ item.variant_name }}</p>
+                            {% if item.has_discount %}
+                            <div class="cart-item-price-block">
+                                <p class="cart-item-price-old">{{ item.quantity }} шт. ? {{ item.original_unit_price|floatformat:0 }} грн</p>
+                                <p class="cart-item-price-current">{{ item.quantity }} шт. ? {{ item.unit_price|floatformat:0 }} грн</p>
+                                <p class="cart-item-discount-label">
+                                    {% if item.discount_badge %}<span class="discount-badge discount-badge--mini">{{ item.discount_badge }}</span>{% endif %}
+                                    {{ item.discount_label }}
+                                </p>
+                            </div>
+                            {% else %}
+                            <p style="color: var(--text-gray); margin: 0;">{{ item.quantity }} шт. ? {{ item.unit_price|floatformat:0 }} грн</p>
+                            {% endif %}
+                            {% if item.glycerin_price > 0 %}
+                            <p style="color: var(--text-gray); margin: 0;">Гліцерин включено: {{ item.glycerin_price|floatformat:0 }} грн</p>
+                            {% endif %}
+                            {% if item.stock_limited and not item.is_available %}
+                            <p style="color: var(--accent-pink); margin: 6px 0 0;">Недостатньо залишку. Оформлення буде заблоковано, поки менеджер не оновить склад.</p>
+                            {% endif %}
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px;">
+                                <form method="post" action="{% url 'cart_update' %}" style="display: flex; gap: 8px; align-items: center;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="cart_key" value="{{ item.cart_key }}">
+                                    <input type="number" name="quantity" value="{{ item.quantity }}" min="0" class="input-field" style="width: 88px; min-height: 42px; padding: 10px 12px;">
+                                    <button type="submit" class="btn-ghost" style="min-height: 42px;">Оновити</button>
+                                </form>
+                                <form method="post" action="{% url 'cart_remove' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="cart_key" value="{{ item.cart_key }}">
+                                    <button type="submit" class="btn-ghost" style="min-height: 42px; border-color: rgba(255, 0, 212, 0.25);">Видалити</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--accent-pink); white-space: nowrap;">{{ item.total|floatformat:0 }} грн</div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="auth-card" style="max-width: 100%; text-align: left;">
+                <h3 style="margin-top: 0; margin-bottom: 20px;">Підсумок замовлення</h3>
+                <div class="summary-list">
+                    <div class="summary-row">
+                        <span>Сума товарів</span>
+                        <strong>{{ pricing.subtotal|floatformat:0 }} грн</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span>Акційні знижки на товари</span>
+                        <strong>{% if pricing.product_discount_total > 0 %}-{{ pricing.product_discount_total|floatformat:0 }} грн{% else %}0 грн{% endif %}</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span>{{ pricing.percent_label }}</span>
+                        <strong>{% if pricing.percent_discount > 0 %}-{{ pricing.percent_discount|floatformat:0 }} грн{% else %}0 грн{% endif %}</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span>Бонус до дня народження</span>
+                        <strong>Додається на етапі оформлення</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span>Доставка</span>
+                        <strong>{{ pricing.delivery_label }}</strong>
+                    </div>
+                    <div class="summary-row summary-row--total">
+                        <span>До сплати зараз</span>
+                        <strong>{{ pricing.final_total|floatformat:0 }} грн</strong>
+                    </div>
+                </div>
+                <p class="summary-note">Бонус 150 грн на день народження можна активувати під час оформлення замовлення. Менеджер перевірить документи.</p>
+                <div style="display: grid; gap: 12px; margin-top: 24px;">
+                    <a href="{% url 'checkout' %}" class="btn-primary" style="text-decoration: none; width: 100%;">Перейти до оформлення</a>
+                    <a href="{% url 'discounts' %}" class="btn-ghost" style="text-decoration: none; width: 100%;">Детально про знижки</a>
+                    <form method="post" action="{% url 'cart_clear' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-ghost" style="width: 100%;">Очистити кошик</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="auth-card" style="max-width: 760px; margin: 40px auto 0;">
+            <h2 style="margin-top: 0;">Кошик порожній</h2>
+            <p style="color: var(--text-gray);">Додайте товари до кошика, щоб побачити автоматичний розрахунок знижки та умови доставки.</p>
+            <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 24px;">
+                <a href="{% url 'catalog_page' %}" class="btn-primary" style="text-decoration: none;">Повернутися до покупок</a>
+                <a href="{% url 'discounts' %}" class="btn-ghost" style="text-decoration: none;">Переглянути знижки</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% include 'includes/support_widget.html' %}
+</body>
+</html>
+
+
+

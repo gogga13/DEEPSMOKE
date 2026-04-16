@@ -1,0 +1,257 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Відповідальне споживання | VapeLand</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}?v=20260408-4">
+    <style>
+        .legal-shell {
+            display: grid;
+            gap: 26px;
+        }
+
+        .legal-hero {
+            position: relative;
+            overflow: hidden;
+            padding: clamp(28px, 5vw, 42px);
+            border-radius: 34px;
+            background:
+                linear-gradient(135deg, rgba(16, 24, 46, 0.94), rgba(6, 11, 22, 0.98)),
+                radial-gradient(circle at 16% 18%, rgba(255, 0, 212, 0.16), transparent 34%),
+                radial-gradient(circle at 82% 14%, rgba(0, 229, 255, 0.14), transparent 30%);
+            border: 1px solid rgba(0, 229, 255, 0.16);
+            box-shadow: 0 26px 80px rgba(0, 0, 0, 0.44), 0 0 30px rgba(0, 229, 255, 0.08);
+        }
+
+        .legal-hero::before,
+        .responsible-card::before,
+        .responsible-side-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 34%);
+            pointer-events: none;
+        }
+
+        .legal-hero > *,
+        .responsible-card > *,
+        .responsible-side-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .legal-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            margin-bottom: 18px;
+            border-radius: 999px;
+            background: rgba(4, 10, 20, 0.52);
+            border: 1px solid rgba(0, 229, 255, 0.18);
+            color: var(--accent-cyan);
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        .legal-title {
+            margin: 0 0 16px;
+            font-family: var(--font-title);
+            font-size: clamp(2.4rem, 7vw, 4.9rem);
+            line-height: 0.94;
+            text-transform: uppercase;
+            letter-spacing: -0.03em;
+        }
+
+        .legal-title span {
+            color: var(--accent-pink);
+            text-shadow: 0 0 16px rgba(255, 0, 212, 0.45);
+        }
+
+        .legal-subtitle {
+            max-width: 860px;
+            margin: 0;
+            color: var(--text-gray);
+            font-size: 1.06rem;
+            line-height: 1.8;
+        }
+
+        .responsible-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .responsible-card,
+        .responsible-side-card {
+            position: relative;
+            overflow: hidden;
+            padding: 28px;
+            border-radius: 30px;
+            background: linear-gradient(180deg, rgba(10, 15, 29, 0.92), rgba(7, 10, 18, 0.98));
+            border: 1px solid rgba(0, 229, 255, 0.14);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.42);
+        }
+
+        .responsible-label {
+            display: inline-block;
+            margin-bottom: 14px;
+            color: var(--accent-cyan);
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        .responsible-card h2,
+        .responsible-side-card h3 {
+            margin: 0 0 16px;
+            font-family: var(--font-title);
+            color: var(--text-white);
+            line-height: 1.06;
+        }
+
+        .responsible-card h2 {
+            font-size: clamp(1.85rem, 3.8vw, 2.65rem);
+        }
+
+        .responsible-side-card h3 {
+            font-size: 1.24rem;
+        }
+
+        .responsible-card p,
+        .responsible-side-card p,
+        .responsible-side-card li {
+            margin: 0;
+            color: var(--text-gray);
+            font-size: 1.02rem;
+            line-height: 1.8;
+        }
+
+        .responsible-card p + p,
+        .responsible-side-card p + p {
+            margin-top: 14px;
+        }
+
+        .responsible-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            display: grid;
+            gap: 14px;
+        }
+
+        .responsible-list li {
+            display: grid;
+            grid-template-columns: 12px 1fr;
+            gap: 12px;
+            align-items: start;
+        }
+
+        .responsible-list li::before {
+            content: "";
+            width: 9px;
+            height: 9px;
+            margin-top: 0.72em;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--accent-pink), var(--accent-cyan));
+            box-shadow: 0 0 12px rgba(255, 0, 212, 0.34);
+        }
+
+        .responsible-note {
+            margin-top: 20px;
+            padding: 18px 20px;
+            border-radius: 20px;
+            background: rgba(255, 0, 212, 0.08);
+            border: 1px solid rgba(255, 0, 212, 0.14);
+            color: var(--text-white);
+            font-weight: 600;
+            line-height: 1.7;
+        }
+
+        .responsible-side-stack {
+            display: grid;
+            gap: 24px;
+        }
+
+        .responsible-highlight {
+            color: var(--text-white);
+            font-weight: 700;
+        }
+
+        @media (max-width: 980px) {
+            .responsible-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .legal-hero,
+            .responsible-card,
+            .responsible-side-card {
+                border-radius: 24px;
+                padding: 22px 18px;
+            }
+
+            .legal-title {
+                font-size: clamp(2.2rem, 12vw, 3.3rem);
+            }
+        }
+    </style>
+</head>
+<body style="display: block; background: var(--bg-black);">
+    <div class="glow-bg"></div>
+
+    {% include 'includes/site_header.html' %}
+
+    <section class="section container" style="padding-top: 0; padding-bottom: 48px;">
+        <div class="legal-shell">
+            <div class="legal-hero">
+                <span class="legal-pill">Responsible use</span>
+                <h1 class="legal-title">Відповідальне <span>споживання</span></h1>
+                <p class="legal-subtitle">Правила безпечного та відповідального використання електронних сигарет і нікотиновмісної продукції. Сторінка побудована просто: що потрібно знати, чого дотримуватись і чому це важливо.</p>
+            </div>
+
+            <div class="responsible-grid">
+                <div class="responsible-card">
+                    <span class="responsible-label">Основне правило</span>
+                    <h2>Електронні сигарети призначені виключно для повнолітніх користувачів</h2>
+                    <p>Електронні сигарети призначені виключно для повнолітніх користувачів, відповідно до вимог законодавства України у сфері охорони здоров’я.</p>
+                    <p>Продукція може містити нікотин — речовину, що викликає залежність. Це зазначено в нормах Закону України «Про заходи щодо попередження та зменшення вживання тютюнових виробів і їх шкідливого впливу на здоров’я населення».</p>
+                    <p>Ми рекомендуємо використовувати лише сертифіковану продукцію, дотримуватися інструкцій виробника та не допускати доступу дітей до пристроїв і рідин.</p>
+                    <div class="responsible-note">Відповідальне споживання — це <span class="responsible-highlight">свідомий вибір</span> і дотримання законодавчих вимог.</div>
+                </div>
+
+                <div class="responsible-side-stack">
+                    <div class="responsible-side-card">
+                        <span class="responsible-label">Що важливо пам’ятати</span>
+                        <h3>Короткі правила використання</h3>
+                        <ul class="responsible-list">
+                            <li><span>Не передавайте пристрої та рідини неповнолітнім.</span></li>
+                            <li><span>Використовуйте лише сертифіковану продукцію від перевірених виробників.</span></li>
+                            <li><span>Дотримуйтеся інструкцій до пристрою, зарядки та зберігання.</span></li>
+                            <li><span>Не залишайте рідини та девайси у вільному доступі для дітей.</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="responsible-side-card">
+                        <span class="responsible-label">Чому це важливо</span>
+                        <h3>Відповідальність користувача</h3>
+                        <p>Продукція для вейпінгу не є нейтральною за впливом і потребує усвідомленого ставлення. Саме тому законодавство окремо регулює продаж, маркування та обмеження доступу до нікотиновмісної продукції.</p>
+                        <p style="margin-top: 14px;">Дотримання цих правил — це не формальність, а базова вимога до безпечного користування.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% include 'includes/support_widget.html' %}
+</body>
+</html>
+
+

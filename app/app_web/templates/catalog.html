@@ -1,0 +1,226 @@
+﻿{% load static %}
+{% load socialaccount %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>Каталог | VapeLand</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}?v=20260413-8">
+</head>
+<body>
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 style="font-family: var(--font-title); font-size: 2.2rem; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.08em;">Вхід у <span>VapeLand</span></h2>
+            <p style="color: var(--text-gray); margin: 0 0 30px;">Увійдіть у свій акаунт, щоб оформлювати замовлення швидше та бачити історію покупок.</p>
+
+            <a href="{% provider_login_url 'google' %}" class="auth-btn google-btn">
+                <img src="{% static 'images/google.png' %}" alt="Google" style="width: 20px; height: 20px; object-fit: contain;">
+                Увійти через Google
+            </a>
+        </div>
+    </div>
+
+    <div class="glow-bg"></div>
+
+    {% include 'includes/site_header.html' %}
+
+    <section class="section container" style="padding-top: 0;">
+        <div class="catalog-page-layout">
+            <aside class="catalog-sidebar-page">
+                <div class="catalog-sidebar-head">
+                    <span class="section-kicker">VapeLand</span>
+                    <h2>Каталог товарів</h2>
+                </div>
+                <div class="catalog-sidebar-links">
+                    <a href="{% url 'catalog_page' %}{% if search_query %}?q={{ search_query|urlencode }}{% endif %}" class="catalog-sidebar-link {% if not selected_category %}is-active{% endif %}">
+                        Усі товари
+                    </a>
+                    {% for category in categories %}
+                    <a href="{% url 'catalog_page' %}?category={{ category.id }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}" class="catalog-sidebar-link {% if selected_category and selected_category.id == category.id %}is-active{% endif %}">
+                        {{ category.name }}
+                    </a>
+                    {% if category.children.all %}
+                    <div class="catalog-sidebar-children">
+                        {% for child in category.children.all|slice:':4' %}
+                        <span>{{ child.name }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </aside>
+
+            <div class="catalog-products-panel">
+                <div class="catalog-products-head">
+                    <div>
+                        <p class="section-kicker">Catalog</p>
+                        <h1 class="section-title" style="margin-bottom: 10px;">
+                            {% if selected_category %}
+                                {{ selected_category.name }}
+                            {% else %}
+                                Усі <span>товари</span>
+                            {% endif %}
+                        </h1>
+                        <p class="section-copy">
+                            {% if search_query %}
+                            Результати пошуку за запитом "{{ search_query }}".
+                            {% else %}
+                            Обирайте актуальні позиції VapeLand та додавайте їх у кошик без зайвих кроків.
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="catalog-filter-note">{{ products_total }} товарів</div>
+                </div>
+
+                <div class="product-grid">
+                    {% for product in products %}
+                    <div class="product-card animate-fade">
+                        <a href="{% url 'product_detail' product.slug %}" style="text-decoration: none; color: inherit; display: block;">
+                            <div class="card-image">
+                                {% if product.discount_data.has_discount %}
+                                <span class="discount-badge">{{ product.discount_data.discount_badge }}</span>
+                                {% endif %}
+                                {% if product.image %}
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                                {% else %}
+                                <img src="https://via.placeholder.com/300x300?text=VapeLand" alt="{{ product.name }}">
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <span class="card-category">{{ product.category.name }}</span>
+                                <h3 class="card-name">{{ product.name }}</h3>
+                                {% if product.discount_data.has_discount %}
+                                <div class="price-stack">
+                                    <span class="price-old">{{ product.discount_data.base_price|floatformat:0 }} грн</span>
+                                    <span class="price-current">{{ product.discount_data.final_price|floatformat:0 }} грн</span>
+                                </div>
+                                <p class="discount-caption">{{ product.discount_data.discount_label }}</p>
+                                {% else %}
+                                <span class="price-tag">{{ product.discount_data.final_price|floatformat:0 }} грн</span>
+                                {% endif %}
+                                {% if product.stock_qty == 0 %}
+                                <p class="review-empty" style="margin-top: 10px;">Немає в наявності</p>
+                                {% endif %}
+                            </div>
+                        </a>
+                        <div class="card-footer">
+                            {% if product.stock_qty == 0 %}
+                            <button
+                                type="button"
+                                class="btn-primary"
+                                style="width: 100%;"
+                                disabled
+                            >
+                                НЕМАЄ В НАЯВНОСТІ
+                            </button>
+                            {% elif product.active_variant_count %}
+                            <a
+                                href="{% url 'product_detail' product.slug %}"
+                                class="btn-ghost"
+                                style="width: 100%; text-decoration: none; text-align: center;"
+                            >
+                                ОБРАТИ ВАРІАНТ
+                            </a>
+                            {% else %}
+                            <button
+                                type="button"
+                                data-add-to-cart="{{ product.id }}"
+                                class="btn-primary"
+                                style="width: 100%;"
+                            >
+                                У КОШИК
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="review-form-card" style="grid-column: 1 / -1;">
+                        <h3 style="margin-top: 0;">Товарів не знайдено</h3>
+                        <p class="review-empty">Спробуйте змінити пошуковий запит або вибрати іншу категорію.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% if page_obj and page_obj.paginator.num_pages > 1 %}
+                <div class="catalog-pagination">
+                    {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category.id }}{% endif %}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}" class="btn-ghost">Назад</a>
+                    {% endif %}
+                    <span class="catalog-pagination__status">Сторінка {{ page_obj.number }} з {{ page_obj.paginator.num_pages }}</span>
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if selected_category %}&category={{ selected_category.id }}{% endif %}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}" class="btn-ghost">Далі</a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    {% include 'includes/support_widget.html' %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('loginModal');
+            const btns = document.querySelectorAll('.nav-cta');
+            const span = document.querySelector('.close-modal');
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+            btns.forEach((btn) => {
+                btn.onclick = (event) => {
+                    event.preventDefault();
+                    modal.style.display = 'flex';
+                };
+            });
+
+            if (span) {
+                span.onclick = () => {
+                    modal.style.display = 'none';
+                };
+            }
+
+            window.onclick = (event) => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            };
+
+            document.querySelectorAll('[data-add-to-cart]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    fetch(`/cart/add/${button.dataset.addToCart}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: '',
+                    })
+                        .then(async (response) => {
+                            const data = await response.json();
+                            if (!response.ok) {
+                                throw new Error(data.message || 'Не вдалося додати товар у кошик.');
+                            }
+                            return data;
+                        })
+                        .then((data) => {
+                            if (data.status === 'ok') {
+                                const cartCount = document.getElementById('cart-count');
+                                if (cartCount) {
+                                    cartCount.innerText = data.cart_count;
+                                }
+                                location.reload();
+                            }
+                        })
+                        .catch((error) => {
+                            window.alert(error.message);
+                        });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
+

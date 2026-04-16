@@ -29,25 +29,21 @@
                 {% for item in cart_items %}
                 <div class="order-item-row">
                     <div style="display: flex; align-items: center; gap: 18px; min-width: 0;">
-                        {% if item.product.image %}
-                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" style="width: 80px; height: 80px; object-fit: contain; border-radius: 18px; background: rgba(255,255,255,0.04); padding: 10px;">
-                        {% else %}
-                        <img src="https://via.placeholder.com/100x100?text=VapeLand" alt="{{ item.product.name }}" style="width: 80px; height: 80px; object-fit: contain; border-radius: 18px; background: rgba(255,255,255,0.04); padding: 10px;">
-                        {% endif %}
+                        <img src="{{ item.image_url }}" alt="{{ item.product.name }}" style="width: 80px; height: 80px; object-fit: contain; border-radius: 18px; background: rgba(255,255,255,0.04); padding: 10px;">
                         <div style="min-width: 0;">
                             <h3 style="margin: 0 0 6px;">{{ item.product.name }}</h3>
                             <p style="color: var(--text-gray); margin: 0;">Варіант: {{ item.variant_name }}</p>
                             {% if item.has_discount %}
                             <div class="cart-item-price-block">
-                                <p class="cart-item-price-old">{{ item.quantity }} шт. ? {{ item.original_unit_price|floatformat:0 }} грн</p>
-                                <p class="cart-item-price-current">{{ item.quantity }} шт. ? {{ item.unit_price|floatformat:0 }} грн</p>
+                                <p class="cart-item-price-old">{{ item.quantity }} шт. × {{ item.original_unit_price|floatformat:0 }} грн</p>
+                                <p class="cart-item-price-current">{{ item.quantity }} шт. × {{ item.unit_price|floatformat:0 }} грн</p>
                                 <p class="cart-item-discount-label">
                                     {% if item.discount_badge %}<span class="discount-badge discount-badge--mini">{{ item.discount_badge }}</span>{% endif %}
                                     {{ item.discount_label }}
                                 </p>
                             </div>
                             {% else %}
-                            <p style="color: var(--text-gray); margin: 0;">{{ item.quantity }} шт. ? {{ item.unit_price|floatformat:0 }} грн</p>
+                            <p style="color: var(--text-gray); margin: 0;">{{ item.quantity }} шт. × {{ item.unit_price|floatformat:0 }} грн</p>
                             {% endif %}
                             {% if item.glycerin_price > 0 %}
                             <p style="color: var(--text-gray); margin: 0;">Гліцерин включено: {{ item.glycerin_price|floatformat:0 }} грн</p>

@@ -343,9 +343,42 @@ def home(request):
     )
 
 
+def _attach_card_image_urls(products):
+    products = [p for p in (products or []) if p]
+    if not products:
+        return
+
+    variant_images = (
+        ProductVariant.objects.filter(
+            product__in=products,
+            is_active=True,
+            image__isnull=False,
+        )
+        .exclude(image="")
+        .order_by("product_id", "id")
+        .values_list("product_id", "image")
+    )
+    first_variant_image_by_product = {}
+    for product_id, image in variant_images:
+        if product_id not in first_variant_image_by_product:
+            first_variant_image_by_product[product_id] = image
+
+    for product in products:
+        if product.image:
+            product.card_image_url = product.image.url
+        else:
+            variant_image = first_variant_image_by_product.get(product.id)
+            product.card_image_url = f"{settings.MEDIA_URL}{variant_image}" if variant_image else None
+
+
 def catalog_page(request):
     categories = Category.objects.filter(parent__isnull=True).prefetch_related("children").order_by("name")
-    products = Product.objects.filter(is_active=True).select_related("category").annotate(active_variant_count=Count("variants", filter=Q(variants__is_active=True), distinct=True)).order_by("name")
+    products = (
+        Product.objects.filter(is_active=True)
+        .select_related("category")
+        .annotate(active_variant_count=Count("variants", filter=Q(variants__is_active=True), distinct=True))
+        .order_by("name")
+    )
     selected_category = None
     query = request.GET.get("q", "").strip()
     category_id = request.GET.get("category", "").strip()
@@ -362,6 +395,7 @@ def catalog_page(request):
     page_obj = paginator.get_page(request.GET.get("page") or 1)
     page_products = list(page_obj.object_list)
     enrich_products_with_discount_data(page_products, user=request.user if request.user.is_authenticated else None)
+    _attach_card_image_urls(page_products)
 
     return render(
         request,
@@ -392,7 +426,13 @@ def search_products(request):
 
     results = []
     for product in products:
-        image_url = product.image.url if product.image else "https://via.placeholder.com/80x80?text=VapeLand"
+        if product.image:
+            image_url = product.image.url
+        else:
+            variant_image = (
+                product.variants.filter(is_active=True, image__isnull=False).exclude(image="").order_by("id").values_list("image", flat=True).first()
+            )
+            image_url = f"{settings.MEDIA_URL}{variant_image}" if variant_image else "https://via.placeholder.com/80x80?text=VapeLand"
         results.append(
             {
                 "id": product.id,
@@ -785,7 +825,13 @@ def place_order(request):
 
 def product_detail(request, slug):
     product = get_object_or_404(Product.objects.select_related("category"), slug=slug, is_active=True)
-    variants = product.variants.filter(is_active=True)
+    variants = product.variants.filter(is_active=True).order_by("id")
+    primary_image_url = None
+    if product.image:
+        primary_image_url = product.image.url
+    else:
+        variant_image = variants.filter(image__isnull=False).exclude(image="").values_list("image", flat=True).first()
+        primary_image_url = f"{settings.MEDIA_URL}{variant_image}" if variant_image else None
     compatible = list(product.compatible_products.filter(is_active=True)[:4])
     similar_qs = product.similar_products.filter(is_active=True).exclude(pk=product.pk)
     similar = list(similar_qs[:4])
@@ -794,6 +840,8 @@ def product_detail(request, slug):
     enrich_products_with_discount_data([product], user=request.user if request.user.is_authenticated else None)
     enrich_products_with_discount_data(compatible, user=request.user if request.user.is_authenticated else None)
     enrich_products_with_discount_data(similar, user=request.user if request.user.is_authenticated else None)
+    _attach_card_image_urls(compatible)
+    _attach_card_image_urls(similar)
     approved_reviews = product.reviews.filter(is_approved=True).select_related("user")
     review_stats = approved_reviews.aggregate(avg=Avg("rating"), count=Count("id"))
 
@@ -803,6 +851,7 @@ def product_detail(request, slug):
         {
             "product": product,
             "variants": variants,
+            "primary_image_url": primary_image_url,
             "compatible": compatible,
             "similar": similar,
             "reviews": approved_reviews,

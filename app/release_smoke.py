@@ -1,13 +1,21 @@
+import os
+import sys
 from datetime import timedelta
 from pathlib import Path
 from uuid import uuid4
 
+import django
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.test import Client
 from django.urls import reverse
 from django.utils import timezone
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "app.settings")
+django.setup()
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 from app import views
 from app_web.models import Category, Order, PasswordResetCode, Product, ProductVariant, Profile, Review
@@ -44,7 +52,7 @@ def main():
     profile.phone = "+380501234567"
     profile.city = "Миколаїв"
     profile.address = "Відділення №1"
-    profile.birth_date = timezone.localdate() + timedelta(days=3)
+    profile.birth_date = timezone.localdate() - timedelta(days=365 * 25)
     profile.save(update_fields=["phone", "city", "address", "birth_date"])
 
     logout_response = client.post(reverse("account_logout"), follow=False)
@@ -131,19 +139,24 @@ def main():
         sent_payload["text"] = text
         return {"ok": True}
 
+    order_count_before = Order.objects.count()
+
     views.send_telegram_message = fake_send
     try:
         checkout_response = login_new_client.get(reverse("checkout"))
         print("CHECKOUT_STATUS", checkout_response.status_code)
 
-        place_response = login_new_client.post(reverse("place_order"), {"birthday_bonus_ack": "on"}, follow=False)
+        place_response = login_new_client.post(reverse("place_order"), {}, follow=False)
         print("PLACE_STATUS", place_response.status_code)
     finally:
         views.send_telegram_message = original_send
 
     order = Order.objects.order_by("-id").first()
+    if order and Order.objects.count() <= order_count_before:
+        order = None
     order_item = order.items.first() if order else None
     variant.refresh_from_db()
+    print("ORDER_CREATED", bool(order))
     print("ORDER_VARIANT", order_item.variant_name if order_item else None)
     print("STOCK_AFTER_ORDER", variant.stock_qty)
     print("TG_HAS_VARIANT", "Варіант: Blue" in sent_payload.get("text", ""))

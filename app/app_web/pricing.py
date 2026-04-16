@@ -1,6 +1,7 @@
 from datetime import date, datetime
 from decimal import Decimal, ROUND_HALF_UP
 
+from django.conf import settings
 from django.utils import timezone
 
 from .models import ProductDiscount, ProductVariant
@@ -12,6 +13,7 @@ DISCOUNT_RATE_3 = Decimal("0.03")
 DISCOUNT_RATE_5 = Decimal("0.05")
 BIRTHDAY_BONUS = Decimal("150.00")
 DEFAULT_VARIANT_NAME = "Стандарт"
+CART_IMAGE_PLACEHOLDER = "https://via.placeholder.com/100x100?text=VapeLand"
 
 
 def money(value):
@@ -145,7 +147,11 @@ def build_product_discount_label(discount):
 
 def get_product_price_with_discount(product, user=None, at=None, product_discount=None):
     at = _coerce_at(at)
-    discount = product_discount if product_discount is not None else get_active_product_discount_map([product.pk], at=at).get(product.pk)
+    discount = (
+        product_discount
+        if product_discount is not None
+        else get_active_product_discount_map([product.pk], at=at).get(product.pk)
+    )
     base_price = money(product.effective_price)
     discount_amount = calculate_product_discount_amount(base_price, discount)
     final_price = money(base_price - discount_amount)
@@ -176,6 +182,22 @@ def enrich_products_with_discount_data(products, user=None, at=None):
             product_discount=discount_map.get(product.pk),
         )
     return products
+
+
+def _resolve_cart_item_image_url(product, variant=None):
+    if variant and getattr(variant, "image", None):
+        return variant.image.url
+    if product.image:
+        return product.image.url
+
+    first_variant_image = (
+        product.variants.filter(is_active=True, image__isnull=False)
+        .exclude(image="")
+        .order_by("id")
+        .values_list("image", flat=True)
+        .first()
+    )
+    return f"{settings.MEDIA_URL}{first_variant_image}" if first_variant_image else CART_IMAGE_PLACEHOLDER
 
 
 def get_cart_items(cart):
@@ -210,6 +232,7 @@ def get_cart_items(cart):
                 "product": product,
                 "variant": variant,
                 "variant_name": variant.name if variant else DEFAULT_VARIANT_NAME,
+                "image_url": _resolve_cart_item_image_url(product, variant),
                 "quantity": quantity,
                 "base_price": money(product.price),
                 "glycerin_price": glycerin_price,

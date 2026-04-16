@@ -6,23 +6,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VapeLand | м. Миколаїв</title>
-    <link rel="stylesheet" href="{% static 'style.css' %}?v=20260413-8">
+    <link rel="stylesheet" href="{% static 'style.css' %}?v=20260414-2">
 </head>
 <body>
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
-            <h2 style="font-family: var(--font-title); font-size: 2.2rem; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.08em;">Вхід у <span>VapeLand</span></h2>
-            <p style="color: var(--text-gray); margin: 0 0 30px;">Увійдіть у свій акаунт, щоб оформлювати замовлення ще швидше.</p>
+            <h2 class="modal-title">Вхід у <span>VapeLand</span></h2>
+            <p class="modal-subtitle">Увійдіть у свій акаунт, щоб оформлювати замовлення ще швидше.</p>
 
             <a href="{% provider_login_url 'google' %}" class="auth-btn google-btn">
-                <img src="{% static 'images/google.png' %}" alt="Google" style="width: 20px; height: 20px; object-fit: contain;">
+                <img src="{% static 'images/google.png' %}" alt="Google">
                 Увійти через Google
             </a>
 
-            <p style="margin-top: 25px; font-size: 1rem; color: var(--text-gray);">
+            <p class="auth-helper-text">
                 Немає акаунта?
-                <a href="{% url 'account_signup' %}" style="color: var(--accent-pink); font-weight: 700; text-decoration: none;">Зареєструватися</a>
+                <a href="{% url 'account_signup' %}" class="auth-helper-link">Зареєструватися</a>
             </p>
         </div>
     </div>
@@ -75,7 +75,7 @@
             {% for category in popular_categories %}
             <a href="{{ category.url }}" class="category-spotlight animate-fade" style="background-image: linear-gradient(180deg, rgba(5, 8, 18, 0.18), rgba(5, 8, 18, 0.9)), url('{{ category.image_url }}');">
                 <div class="category-spotlight-body">
-                    <span class="section-kicker" style="margin-bottom: 10px;">VapeLand</span>
+                    <span class="section-kicker category-spotlight-kicker">VapeLand</span>
                     <h3>{{ category.name }}</h3>
                     <ul class="category-spotlight-list">
                         {% for item in category.items %}
@@ -87,8 +87,8 @@
                 </div>
             </a>
             {% empty %}
-            <div class="review-form-card" style="grid-column: 1 / -1;">
-                <h3 style="margin-top: 0;">Додайте featured-категорії в адмінці</h3>
+            <div class="review-form-card review-form-card--wide">
+                <h3 class="flush-title">Додайте featured-категорії в адмінці</h3>
                 <p class="review-empty">Щоб блок з'явився, у категорій потрібно увімкнути прапорець "Показувати на головній".</p>
             </div>
             {% endfor %}
@@ -99,13 +99,13 @@
     <section class="section container">
         <div class="section-header">
             <p class="section-kicker">Hot Drops</p>
-            <h2 class="section-title">?? Шалені <span>знижки!</span></h2>
+            <h2 class="section-title">⚡ Шалені <span>знижки!</span></h2>
             <p class="section-copy">Товари з активними акціями. Для них діє окрема пріоритетна знижка з адмінки, тому додаткові знижки на ці позиції не накладаються.</p>
         </div>
 
         <div class="product-grid">
             {% for product in discounted_products %}
-            <a href="{% url 'product_detail' product.slug %}" class="product-card animate-fade product-card--discount" style="text-decoration: none; color: inherit;">
+            <a href="{% url 'product_detail' product.slug %}" class="product-card animate-fade product-card--discount product-card-link">
                 <div class="card-image">
                     <span class="discount-badge">{{ product.discount_data.discount_badge|default:"АКЦІЯ" }}</span>
                     {% if product.image %}
@@ -157,17 +157,17 @@
                 {% endfor %}
             </div>
             <div class="review-form-card">
-                <h3 style="margin-top: 0;">Залишити відгук про сайт</h3>
+                <h3 class="flush-title">Залишити відгук про сайт</h3>
                 {% if user.is_authenticated %}
                 <form method="post" action="{% url 'add_site_review' %}">
                     {% csrf_token %}
                     {{ site_review_form.rating }}
                     {{ site_review_form.text }}
-                    <button type="submit" class="btn-primary" style="width: 100%;">Надіслати відгук</button>
+                    <button type="submit" class="btn-primary btn-block">Надіслати відгук</button>
                 </form>
                 {% else %}
                 <p class="review-empty">Щоб залишити відгук, увійдіть у свій акаунт.</p>
-                <a href="{% url 'account_login' %}" class="btn-ghost" style="text-decoration: none; width: 100%;">Увійти</a>
+                <a href="{% url 'account_login' %}" class="btn-ghost btn-link-block">Увійти</a>
                 {% endif %}
             </div>
         </div>
@@ -176,7 +176,7 @@
     <footer id="contact" class="site-footer">
         <div class="container footer-shell">
             <div class="footer-brand">
-                <div class="logo" style="justify-content: center;">VAPE <span>LAND</span></div>
+                <div class="logo logo-centered">VAPE <span>LAND</span></div>
                 <p>VapeLand у м. Миколаїв: швидкий вибір POD-систем, картриджів, рідин та аксесуарів у єдиному neon-просторі.</p>
             </div>
             <div class="footer-grid">

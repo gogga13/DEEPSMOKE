@@ -60,12 +60,12 @@
 
                 <div class="password-field" style="margin-top: 15px;">
                     <input type="password" name="password1" placeholder="Пароль (мін. 8 символів)" required class="input-field" data-password-input="true">
-                    <button type="button" class="password-toggle" data-password-toggle="true" aria-label="Показати пароль">??</button>
+                    <button type="button" class="password-toggle" data-password-toggle="true" aria-label="Показати пароль">👁</button>
                 </div>
 
                 <div class="password-field" style="margin-top: 15px;">
                     <input type="password" name="password2" placeholder="Повторіть пароль" required class="input-field" data-password-input="true">
-                    <button type="button" class="password-toggle" data-password-toggle="true" aria-label="Показати пароль">??</button>
+                    <button type="button" class="password-toggle" data-password-toggle="true" aria-label="Показати пароль">👁</button>
                 </div>
 
                 <button type="submit" class="btn-primary" style="width: 100%; margin-top: 25px;">
@@ -97,7 +97,7 @@
                 const input = wrapper?.querySelector('[data-password-input="true"]');
                 if (!input) return;
                 input.type = input.type === 'password' ? 'text' : 'password';
-                button.textContent = input.type === 'password' ? '??' : '??';
+                button.textContent = input.type === 'password' ? '👁' : '🙈';
             });
         });
     </script>

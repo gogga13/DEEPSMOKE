@@ -1,57 +1,48 @@
 {% load static %}
 {% load i18n %}
-{% load crispy_forms_tags %}
-
 <!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Завершення реєстрації | VapeLand</title>
-    <link rel="stylesheet" href="{% static 'style.css' %}?v=20260326-1">
+    <link rel="stylesheet" href="{% static 'style.css' %}?v=20260417-3">
 </head>
 <body class="auth-page">
-
     <div class="glow-bg"></div>
-
     <div class="container auth-container">
-        <div class="auth-card animate-fade">
-            <!-- Логотип -->
-            <a href="/" class="logo" style="margin-bottom: 30px; display: inline-block;">VAPE <span>LAND</span></a>
-            
-            <h1 style="font-family: var(--font-title); font-size: 2.2rem; margin-bottom: 10px;">Майже <span>готово</span></h1>
-            <p style="color: var(--text-gray); margin-bottom: 30px; font-size: 0.9rem;">
-                Ви входите через Google. Будь ласка, оберіть ім'я користувача для завершення.
-            </p>
+        <div class="auth-card auth-card--auth animate-fade">
+            <a href="/" class="logo auth-card__logo">VAPE <span>LAND</span></a>
+            <p class="section-kicker">Finish signup</p>
+            <h1 class="auth-title">Майже <span>готово</span></h1>
+            <p class="auth-subtitle">Ви входите через Google. Оберіть ім'я користувача, щоб завершити створення акаунта.</p>
 
-            <!-- Форма завершення реєстрації -->
             <form class="signup-form" id="signup_form" method="post" action="{% url 'socialaccount_signup' %}">
                 {% csrf_token %}
-                
+
                 {% if form.errors %}
-                    <div class="error-msg" style="color: #ff4444; font-size: 0.8rem; margin-bottom: 15px; text-align: left;">
-                        Перевірте правильність введених даних.
-                    </div>
+                <div class="error-msg">Перевірте правильність введених даних.</div>
                 {% endif %}
 
                 <div class="input-group">
-                    <label style="color: var(--accent-pink); font-size: 0.7rem; text-transform: uppercase; margin-bottom: 8px; display: block;">Електронна пошта</label>
-                    <input type="email" name="email" value="{{ form.email.value|default:'' }}" class="input-field" placeholder="Email" readonly style="opacity: 0.6;">
+                    <label>Електронна пошта</label>
+                    <input type="email" name="email" value="{{ form.email.value|default:'' }}" class="input-field auth-readonly" placeholder="Email" readonly>
                 </div>
 
-                <div class="input-group" style="margin-top: 20px;">
-                    <label style="color: var(--accent-pink); font-size: 0.7rem; text-transform: uppercase; margin-bottom: 8px; display: block;">Ім'я користувача (логін)</label>
+                <div class="input-group">
+                    <label>Ім'я користувача</label>
                     <input type="text" name="username" placeholder="Придумайте логін" required class="input-field">
                 </div>
 
-                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 30px;">
-                    ЗАРЕЄСТРУВАТИСЯ
-                </button>
+                <button type="submit" class="btn-primary btn-block">ЗАВЕРШИТИ РЕЄСТРАЦІЮ</button>
             </form>
 
-            <a href="/" style="display: block; margin-top: 20px; color: var(--text-gray); text-decoration: none; font-size: 0.8rem;">Скасувати</a>
+            <div class="auth-links-row">
+                <a href="{% url 'home' %}" class="auth-link">Скасувати</a>
+            </div>
         </div>
     </div>
 
+    {% include 'includes/support_widget.html' %}
 </body>
 </html>

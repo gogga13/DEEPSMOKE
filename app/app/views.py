@@ -42,6 +42,7 @@ from app_web.pricing import (
 
 
 User = get_user_model()
+STATIC_IMAGE_FALLBACK = f"{settings.STATIC_URL}images/logo.png"
 
 
 CATALOG_ICON_SVGS = {
@@ -220,7 +221,21 @@ def get_category_image_url(category):
     if first_product and first_product.image:
         return first_product.image.url
 
-    return "https://via.placeholder.com/900x620?text=VapeLand"
+    variant_image = (
+        ProductVariant.objects.filter(
+            Q(product__category=category) | Q(product__category__parent=category),
+            product__is_active=True,
+            is_active=True,
+            image__isnull=False,
+        )
+        .exclude(image="")
+        .order_by("product_id", "id")
+        .first()
+    )
+    if variant_image and variant_image.image:
+        return variant_image.image.url
+
+    return STATIC_IMAGE_FALLBACK
 
 
 def build_featured_categories():
@@ -328,6 +343,7 @@ def home(request):
         .order_by("name")[:8]
     )
     enrich_products_with_discount_data(discounted_products, user=request.user if request.user.is_authenticated else None, at=now)
+    _attach_card_image_urls(discounted_products)
 
     return render(
         request,
@@ -356,19 +372,19 @@ def _attach_card_image_urls(products):
         )
         .exclude(image="")
         .order_by("product_id", "id")
-        .values_list("product_id", "image")
+        .only("product_id", "image")
     )
     first_variant_image_by_product = {}
-    for product_id, image in variant_images:
-        if product_id not in first_variant_image_by_product:
-            first_variant_image_by_product[product_id] = image
+    for variant in variant_images:
+        if variant.product_id not in first_variant_image_by_product and variant.image:
+            first_variant_image_by_product[variant.product_id] = variant.image.url
 
     for product in products:
         if product.image:
             product.card_image_url = product.image.url
         else:
             variant_image = first_variant_image_by_product.get(product.id)
-            product.card_image_url = f"{settings.MEDIA_URL}{variant_image}" if variant_image else None
+            product.card_image_url = variant_image or STATIC_IMAGE_FALLBACK
 
 
 def catalog_page(request):
@@ -432,7 +448,7 @@ def search_products(request):
             variant_image = (
                 product.variants.filter(is_active=True, image__isnull=False).exclude(image="").order_by("id").values_list("image", flat=True).first()
             )
-            image_url = f"{settings.MEDIA_URL}{variant_image}" if variant_image else "https://via.placeholder.com/80x80?text=VapeLand"
+            image_url = f"{settings.MEDIA_URL}{variant_image}" if variant_image else STATIC_IMAGE_FALLBACK
         results.append(
             {
                 "id": product.id,
@@ -830,8 +846,8 @@ def product_detail(request, slug):
     if product.image:
         primary_image_url = product.image.url
     else:
-        variant_image = variants.filter(image__isnull=False).exclude(image="").values_list("image", flat=True).first()
-        primary_image_url = f"{settings.MEDIA_URL}{variant_image}" if variant_image else None
+        variant_image = variants.filter(image__isnull=False).exclude(image="").first()
+        primary_image_url = variant_image.image.url if variant_image and variant_image.image else STATIC_IMAGE_FALLBACK
     compatible = list(product.compatible_products.filter(is_active=True)[:4])
     similar_qs = product.similar_products.filter(is_active=True).exclude(pk=product.pk)
     similar = list(similar_qs[:4])
@@ -971,8 +987,6 @@ def password_reset_confirm_view(request):
             return redirect("account_login")
 
     return render(request, "account/password_reset_confirm.html", {"form": form, "email": email})
-
-
 
 
 

@@ -13,7 +13,7 @@ DISCOUNT_RATE_3 = Decimal("0.03")
 DISCOUNT_RATE_5 = Decimal("0.05")
 BIRTHDAY_BONUS = Decimal("150.00")
 DEFAULT_VARIANT_NAME = "Стандарт"
-CART_IMAGE_PLACEHOLDER = "https://via.placeholder.com/100x100?text=VapeLand"
+CART_IMAGE_PLACEHOLDER = f"{settings.STATIC_URL}images/logo.png"
 
 
 def money(value):
@@ -190,14 +190,15 @@ def _resolve_cart_item_image_url(product, variant=None):
     if product.image:
         return product.image.url
 
-    first_variant_image = (
+    first_variant = (
         product.variants.filter(is_active=True, image__isnull=False)
         .exclude(image="")
         .order_by("id")
-        .values_list("image", flat=True)
         .first()
     )
-    return f"{settings.MEDIA_URL}{first_variant_image}" if first_variant_image else CART_IMAGE_PLACEHOLDER
+    if first_variant and getattr(first_variant, "image", None):
+        return first_variant.image.url
+    return CART_IMAGE_PLACEHOLDER
 
 
 def get_cart_items(cart):

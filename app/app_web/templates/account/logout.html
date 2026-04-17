@@ -5,23 +5,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вихід | VapeLand</title>
-    <link rel="stylesheet" href="{% static 'style.css' %}?v=20260330-3">
+    <link rel="stylesheet" href="{% static 'style.css' %}?v=20260417-3">
 </head>
 <body class="auth-page">
     <div class="glow-bg"></div>
     <div class="container auth-container">
-        <div class="auth-card animate-fade">
-            <a href="/" class="logo" style="margin-bottom: 30px; display: inline-block;">VAPE <span>LAND</span></a>
-            <h1 style="font-family: var(--font-title); font-size: 2.5rem; margin-bottom: 20px;">Вийти з <span>акаунта?</span></h1>
-            <p style="color: var(--text-gray); margin-bottom: 30px;">Ви впевнені, що хочете завершити сеанс?</p>
+        <div class="auth-card auth-card--auth animate-fade">
+            <a href="/" class="logo auth-card__logo">VAPE <span>LAND</span></a>
+            <p class="section-kicker">Logout</p>
+            <h1 class="auth-title">Вийти з <span>акаунта?</span></h1>
+            <p class="auth-subtitle">Сесію буде завершено на цьому пристрої. Ви зможете увійти знову в будь-який момент.</p>
 
-            <form method="post" action="{% url 'account_logout' %}">
+            <form method="post" action="{% url 'account_logout' %}" class="auth-action-stack">
                 {% csrf_token %}
-                <button type="submit" class="btn-primary" style="width: 100%;">Так, вийти</button>
+                <button type="submit" class="btn-primary btn-block">ТАК, ВИЙТИ</button>
+                <a href="{% url 'home' %}" class="btn-ghost btn-link-block">СКАСУВАТИ</a>
             </form>
-
-            <a href="/" style="display: block; margin-top: 20px; color: var(--text-gray); text-decoration: none;">Скасувати</a>
         </div>
     </div>
+
+    {% include 'includes/support_widget.html' %}
 </body>
 </html>

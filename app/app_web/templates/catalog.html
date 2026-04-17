@@ -6,19 +6,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token }}">
-    <title>&#1050;&#1072;&#1090;&#1072;&#1083;&#1086;&#1075; | VapeLand</title>
-    <link rel="stylesheet" href="{% static 'style.css' %}?v=20260414-3">
+    <title>Каталог | VapeLand</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}?v=20260418-1">
 </head>
-<body>
+<body class="site-page catalog-page">
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
-            <h2 class="modal-title">&#1042;&#1093;&#1110;&#1076; &#1091; <span>VapeLand</span></h2>
-            <p class="modal-subtitle">&#1059;&#1074;&#1110;&#1081;&#1076;&#1110;&#1090;&#1100; &#1091; &#1089;&#1074;&#1110;&#1081; &#1072;&#1082;&#1072;&#1091;&#1085;&#1090;, &#1097;&#1086;&#1073; &#1086;&#1092;&#1086;&#1088;&#1084;&#1083;&#1102;&#1074;&#1072;&#1090;&#1080; &#1079;&#1072;&#1084;&#1086;&#1074;&#1083;&#1077;&#1085;&#1085;&#1103; &#1096;&#1074;&#1080;&#1076;&#1096;&#1077; &#1090;&#1072; &#1073;&#1072;&#1095;&#1080;&#1090;&#1080; &#1110;&#1089;&#1090;&#1086;&#1088;&#1110;&#1102; &#1087;&#1086;&#1082;&#1091;&#1087;&#1086;&#1082;.</p>
+            <h2 class="modal-title">Вхід у <span>VapeLand</span></h2>
+            <p class="modal-subtitle">Увійдіть у свій акаунт, щоб оформлювати замовлення швидше та бачити історію покупок.</p>
 
             <a href="{% provider_login_url 'google' %}" class="auth-btn google-btn">
                 <img src="{% static 'images/google.png' %}" alt="Google">
-                &#1059;&#1074;&#1110;&#1081;&#1090;&#1080; &#1095;&#1077;&#1088;&#1077;&#1079; Google
+                Увійти через Google
             </a>
         </div>
     </div>
@@ -27,128 +27,125 @@
 
     {% include 'includes/site_header.html' %}
 
-    <section class="section container">
-        <div class="catalog-page-layout">
-            <aside class="catalog-sidebar-page">
-                <div class="catalog-sidebar-head">
-                    <span class="section-kicker">VapeLand</span>
-                    <h2>&#1050;&#1072;&#1090;&#1077;&#1075;&#1086;&#1088;&#1110;&#1111; &#1090;&#1086;&#1074;&#1072;&#1088;&#1110;&#1074;</h2>
+    <section class="page-shell">
+        <div class="container">
+            <div class="page-head page-head--compact">
+                <div>
+                    <p class="section-kicker">Каталог</p>
+                    <h1 class="section-title">
+                        {% if selected_category %}
+                            {{ selected_category.name }}
+                        {% else %}
+                            Усі <span>товари</span>
+                        {% endif %}
+                    </h1>
+                    <p class="section-copy">
+                        {% if search_query %}
+                        Показані товари за запитом "{{ search_query }}".
+                        {% else %}
+                        Обирайте актуальні позиції VapeLand і додавайте їх у кошик без зайвих кроків.
+                        {% endif %}
+                    </p>
                 </div>
-                <div class="catalog-sidebar-links">
-                    <a href="{% url 'catalog_page' %}{% if search_query %}?q={{ search_query|urlencode }}{% endif %}" class="catalog-sidebar-link {% if not selected_category %}is-active{% endif %}">
-                        &#1059;&#1089;&#1110; &#1090;&#1086;&#1074;&#1072;&#1088;&#1080;
-                    </a>
-                    {% for category in categories %}
-                    <a href="{% url 'catalog_page' %}?category={{ category.id }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}" class="catalog-sidebar-link {% if selected_category and selected_category.id == category.id %}is-active{% endif %}">
-                        {{ category.name }}
-                    </a>
-                    {% if category.children.all %}
-                    <div class="catalog-sidebar-children">
-                        {% for child in category.children.all|slice:':4' %}
-                        <span>{{ child.name }}</span>
+                <div class="catalog-filter-note">{{ products_total }} товарів</div>
+            </div>
+
+            <div class="catalog-page-layout">
+                <aside class="catalog-sidebar-page">
+                    <div class="catalog-sidebar-head">
+                        <span class="section-kicker">VapeLand</span>
+                        <h2>Категорії товарів</h2>
+                    </div>
+                    <div class="catalog-sidebar-links">
+                        <a href="{% url 'catalog_page' %}{% if search_query %}?q={{ search_query|urlencode }}{% endif %}" class="catalog-sidebar-link {% if not selected_category %}is-active{% endif %}">
+                            Усі товари
+                        </a>
+                        {% for category in categories %}
+                        <a href="{% url 'catalog_page' %}?category={{ category.id }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}" class="catalog-sidebar-link {% if selected_category and selected_category.id == category.id %}is-active{% endif %}">
+                            {{ category.name }}
+                        </a>
+                        {% if category.children.all %}
+                        <div class="catalog-sidebar-children">
+                            {% for child in category.children.all|slice:':4' %}
+                            <span>{{ child.name }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                         {% endfor %}
                     </div>
-                    {% endif %}
-                    {% endfor %}
-                </div>
-            </aside>
+                </aside>
 
-            <div class="catalog-products-panel">
-                <div class="catalog-products-head">
-                    <div>
-                        <p class="section-kicker">&#1050;&#1072;&#1090;&#1072;&#1083;&#1086;&#1075;</p>
-                        <h1 class="section-title section-title--compact">
-                            {% if selected_category %}
-                                {{ selected_category.name }}
-                            {% else %}
-                                &#1059;&#1089;&#1110; <span>&#1090;&#1086;&#1074;&#1072;&#1088;&#1080;</span>
-                            {% endif %}
-                        </h1>
-                        <p class="section-copy">
-                            {% if search_query %}
-                            &#1055;&#1086;&#1082;&#1072;&#1079;&#1072;&#1085;&#1110; &#1090;&#1086;&#1074;&#1072;&#1088;&#1080; &#1079;&#1072; &#1079;&#1072;&#1087;&#1080;&#1090;&#1086;&#1084; &quot;{{ search_query }}&quot;.
-                            {% else %}
-                            &#1054;&#1073;&#1080;&#1088;&#1072;&#1081;&#1090;&#1077; &#1072;&#1082;&#1090;&#1091;&#1072;&#1083;&#1100;&#1085;&#1110; &#1087;&#1086;&#1079;&#1080;&#1094;&#1110;&#1111; VapeLand &#1090;&#1072; &#1076;&#1086;&#1076;&#1072;&#1074;&#1072;&#1081;&#1090;&#1077; &#1111;&#1093; &#1091; &#1082;&#1086;&#1096;&#1080;&#1082; &#1073;&#1077;&#1079; &#1079;&#1072;&#1081;&#1074;&#1080;&#1093; &#1082;&#1088;&#1086;&#1082;&#1110;&#1074;.
-                            {% endif %}
-                        </p>
-                    </div>
-                    <div class="catalog-filter-note">{{ products_total }} &#1090;&#1086;&#1074;&#1072;&#1088;&#1110;&#1074;</div>
-                </div>
-
-                <div class="product-grid">
-                    {% for product in products %}
-                    <div class="product-card animate-fade">
-                        <a href="{% url 'product_detail' product.slug %}" class="product-card-link product-card-link--block">
-                            <div class="card-image">
-                                {% if product.discount_data.has_discount %}
-                                <span class="discount-badge">{{ product.discount_data.discount_badge }}</span>
-                                {% endif %}
-                                {% if product.card_image_url %}
-                                <img src="{{ product.card_image_url }}" alt="{{ product.name }}">
-                                {% else %}
-                                <img src="https://via.placeholder.com/300x300?text=VapeLand" alt="{{ product.name }}">
-                                {% endif %}
-                            </div>
-                            <div class="card-body">
-                                <span class="card-category">{{ product.category.name }}</span>
-                                <h3 class="card-name">{{ product.name }}</h3>
-                                {% if product.discount_data.has_discount %}
-                                <div class="price-stack">
-                                    <span class="price-old">{{ product.discount_data.base_price|floatformat:0 }} &#1075;&#1088;&#1085;</span>
-                                    <span class="price-current">{{ product.discount_data.final_price|floatformat:0 }} &#1075;&#1088;&#1085;</span>
+                <div class="catalog-products-panel">
+                    <div class="product-grid">
+                        {% for product in products %}
+                        <div class="product-card animate-fade">
+                            <a href="{% url 'product_detail' product.slug %}" class="product-card-link product-card-link--block">
+                                <div class="card-image">
+                                    {% if product.discount_data.has_discount %}
+                                    <span class="discount-badge">{{ product.discount_data.discount_badge }}</span>
+                                    {% endif %}
+                                    {% if product.card_image_url %}
+                                    <img src="{{ product.card_image_url }}" alt="{{ product.name }}">
+                                    {% else %}
+                                    <img src="{% static 'images/logo.png' %}" alt="{{ product.name }}">
+                                    {% endif %}
                                 </div>
-                                <p class="discount-caption">{{ product.discount_data.discount_label }}</p>
-                                {% else %}
-                                <span class="price-tag">{{ product.discount_data.final_price|floatformat:0 }} &#1075;&#1088;&#1085;</span>
-                                {% endif %}
+                                <div class="card-body">
+                                    <span class="card-category">{{ product.category.name }}</span>
+                                    <h3 class="card-name">{{ product.name }}</h3>
+                                    {% if product.discount_data.has_discount %}
+                                    <div class="price-stack">
+                                        <span class="price-old">{{ product.discount_data.base_price|floatformat:0 }} грн</span>
+                                        <span class="price-current">{{ product.discount_data.final_price|floatformat:0 }} грн</span>
+                                    </div>
+                                    <p class="discount-caption">{{ product.discount_data.discount_label }}</p>
+                                    {% else %}
+                                    <span class="price-tag">{{ product.discount_data.final_price|floatformat:0 }} грн</span>
+                                    {% endif %}
+                                    {% if product.stock_qty == 0 %}
+                                    <p class="review-empty review-empty--spaced">Немає в наявності</p>
+                                    {% endif %}
+                                </div>
+                            </a>
+                            <div class="card-footer">
                                 {% if product.stock_qty == 0 %}
-                                <p class="review-empty review-empty--spaced">&#1053;&#1077;&#1084;&#1072;&#1108; &#1074; &#1085;&#1072;&#1103;&#1074;&#1085;&#1086;&#1089;&#1090;&#1110;</p>
+                                <button type="button" class="btn-primary btn-block" disabled>НЕМАЄ В НАЯВНОСТІ</button>
+                                {% elif product.active_variant_count %}
+                                <a href="{% url 'product_detail' product.slug %}" class="btn-ghost btn-link-block">ОБРАТИ ВАРІАНТ</a>
+                                {% else %}
+                                <button type="button" data-add-to-cart="{{ product.id }}" class="btn-primary btn-block">У КОШИК</button>
                                 {% endif %}
                             </div>
-                        </a>
-                        <div class="card-footer">
-                            {% if product.stock_qty == 0 %}
-                            <button type="button" class="btn-primary btn-block" disabled>
-                                &#1053;&#1045;&#1052;&#1040;&#1030; &#1042; &#1053;&#1040;&#1071;&#1042;&#1053;&#1054;&#1057;&#1058;&#1030;
-                            </button>
-                            {% elif product.active_variant_count %}
-                            <a href="{% url 'product_detail' product.slug %}" class="btn-ghost btn-link-block">
-                                &#1054;&#1041;&#1056;&#1040;&#1058;&#1048; &#1042;&#1040;&#1056;&#1030;&#1040;&#1053;&#1058;
-                            </a>
-                            {% else %}
-                            <button type="button" data-add-to-cart="{{ product.id }}" class="btn-primary btn-block">
-                                &#1059; &#1050;&#1054;&#1064;&#1048;&#1050;
-                            </button>
-                            {% endif %}
                         </div>
+                        {% empty %}
+                        <div class="review-form-card review-form-card--wide">
+                            <h3 class="flush-title">Товарів не знайдено</h3>
+                            <p class="review-empty">Спробуйте змінити пошуковий запит або вибрати іншу категорію.</p>
+                        </div>
+                        {% endfor %}
                     </div>
-                    {% empty %}
-                    <div class="review-form-card review-form-card--wide">
-                        <h3 class="flush-title">&#1058;&#1086;&#1074;&#1072;&#1088;&#1110;&#1074; &#1085;&#1077; &#1079;&#1085;&#1072;&#1081;&#1076;&#1077;&#1085;&#1086;</h3>
-                        <p class="review-empty">&#1057;&#1087;&#1088;&#1086;&#1073;&#1091;&#1081;&#1090;&#1077; &#1079;&#1084;&#1110;&#1085;&#1080;&#1090;&#1080; &#1087;&#1086;&#1096;&#1091;&#1082;&#1086;&#1074;&#1080;&#1081; &#1079;&#1072;&#1087;&#1080;&#1090; &#1072;&#1073;&#1086; &#1074;&#1080;&#1073;&#1088;&#1072;&#1090;&#1080; &#1110;&#1085;&#1096;&#1091; &#1082;&#1072;&#1090;&#1077;&#1075;&#1086;&#1088;&#1110;&#1102;.</p>
-                    </div>
-                    {% endfor %}
-                </div>
 
-                {% if page_obj and page_obj.paginator.num_pages > 1 %}
-                <div class="catalog-pagination">
-                    {% if page_obj.has_previous %}
-                    <a href="?page={{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category.id }}{% endif %}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}" class="btn-ghost">&#1053;&#1072;&#1079;&#1072;&#1076;</a>
-                    {% endif %}
-                    <span class="catalog-pagination__status">&#1057;&#1090;&#1086;&#1088;&#1110;&#1085;&#1082;&#1072; {{ page_obj.number }} &#1079; {{ page_obj.paginator.num_pages }}</span>
-                    {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}{% if selected_category %}&category={{ selected_category.id }}{% endif %}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}" class="btn-ghost">&#1044;&#1072;&#1083;&#1110;</a>
+                    {% if page_obj and page_obj.paginator.num_pages > 1 %}
+                    <div class="catalog-pagination">
+                        {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category.id }}{% endif %}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}" class="btn-ghost">Назад</a>
+                        {% endif %}
+                        <span class="catalog-pagination__status">Сторінка {{ page_obj.number }} з {{ page_obj.paginator.num_pages }}</span>
+                        {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if selected_category %}&category={{ selected_category.id }}{% endif %}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}" class="btn-ghost">Далі</a>
+                        {% endif %}
+                    </div>
                     {% endif %}
                 </div>
-                {% endif %}
             </div>
         </div>
     </section>
 
+    {% include 'includes/site_footer.html' %}
     {% include 'includes/support_widget.html' %}
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const modal = document.getElementById('loginModal');
             const btns = document.querySelectorAll('.nav-cta');
             const span = document.querySelector('.close-modal');
@@ -186,7 +183,7 @@
                         .then(async (response) => {
                             const data = await response.json();
                             if (!response.ok) {
-                                throw new Error(data.message || '&#1053;&#1077; &#1074;&#1076;&#1072;&#1083;&#1086;&#1089;&#1103; &#1076;&#1086;&#1076;&#1072;&#1090;&#1080; &#1090;&#1086;&#1074;&#1072;&#1088; &#1091; &#1082;&#1086;&#1096;&#1080;&#1082;.');
+                                throw new Error(data.message || 'Не вдалося додати товар у кошик.');
                             }
                             return data;
                         })
@@ -208,4 +205,3 @@
     </script>
 </body>
 </html>
-

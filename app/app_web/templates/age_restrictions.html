@@ -1,241 +1,84 @@
-﻿{% load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вікові обмеження | VapeLand</title>
-    <link rel="stylesheet" href="{% static 'style.css' %}?v=20260408-3">
-    <style>
-        .legal-shell {
-            display: grid;
-            gap: 26px;
-        }
-
-        .legal-hero {
-            position: relative;
-            overflow: hidden;
-            padding: clamp(28px, 5vw, 42px);
-            border-radius: 34px;
-            background:
-                linear-gradient(135deg, rgba(16, 24, 46, 0.94), rgba(6, 11, 22, 0.98)),
-                radial-gradient(circle at 18% 18%, rgba(255, 0, 212, 0.14), transparent 34%),
-                radial-gradient(circle at 82% 14%, rgba(0, 229, 255, 0.12), transparent 30%);
-            border: 1px solid rgba(0, 229, 255, 0.16);
-            box-shadow: 0 26px 80px rgba(0, 0, 0, 0.44), 0 0 30px rgba(255, 0, 212, 0.08);
-        }
-
-        .legal-hero::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 32%);
-            pointer-events: none;
-        }
-
-        .legal-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 16px;
-            margin-bottom: 18px;
-            border-radius: 999px;
-            background: rgba(4, 10, 20, 0.52);
-            border: 1px solid rgba(0, 229, 255, 0.18);
-            color: var(--accent-cyan);
-            font-size: 0.82rem;
-            font-weight: 800;
-            letter-spacing: 0.18em;
-            text-transform: uppercase;
-        }
-
-        .legal-title {
-            margin: 0 0 16px;
-            font-family: var(--font-title);
-            font-size: clamp(2.5rem, 7vw, 4.9rem);
-            line-height: 0.94;
-            text-transform: uppercase;
-            letter-spacing: -0.03em;
-        }
-
-        .legal-title span {
-            color: var(--accent-pink);
-            text-shadow: 0 0 16px rgba(255, 0, 212, 0.45);
-        }
-
-        .legal-subtitle {
-            max-width: 860px;
-            margin: 0;
-            color: var(--text-gray);
-            font-size: 1.06rem;
-            line-height: 1.8;
-        }
-
-        .legal-grid {
-            display: grid;
-            grid-template-columns: 1.15fr 0.85fr;
-            gap: 24px;
-            align-items: start;
-        }
-
-        .legal-card {
-            position: relative;
-            overflow: hidden;
-            padding: 28px;
-            border-radius: 30px;
-            background: linear-gradient(180deg, rgba(10, 15, 29, 0.92), rgba(7, 10, 18, 0.98));
-            border: 1px solid rgba(0, 229, 255, 0.14);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.42);
-        }
-
-        .legal-card::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), transparent 34%);
-            pointer-events: none;
-        }
-
-        .legal-card > * {
-            position: relative;
-            z-index: 1;
-        }
-
-        .legal-label {
-            display: inline-block;
-            margin-bottom: 14px;
-            color: var(--accent-cyan);
-            font-size: 0.82rem;
-            font-weight: 800;
-            letter-spacing: 0.18em;
-            text-transform: uppercase;
-        }
-
-        .legal-card h2,
-        .legal-card h3 {
-            margin: 0 0 16px;
-            font-family: var(--font-title);
-            color: var(--text-white);
-            line-height: 1.08;
-        }
-
-        .legal-card h2 {
-            font-size: clamp(1.75rem, 3.6vw, 2.55rem);
-        }
-
-        .legal-card h3 {
-            font-size: 1.28rem;
-        }
-
-        .legal-card p,
-        .legal-card li {
-            color: var(--text-gray);
-            font-size: 1.02rem;
-            line-height: 1.78;
-        }
-
-        .legal-card p {
-            margin: 0 0 14px;
-        }
-
-        .legal-card p:last-child {
-            margin-bottom: 0;
-        }
-
-        .legal-list {
-            margin: 0;
-            padding-left: 20px;
-        }
-
-        .legal-list li + li {
-            margin-top: 10px;
-        }
-
-        .legal-note {
-            margin-top: 18px;
-            padding: 16px 18px;
-            border-radius: 18px;
-            background: rgba(255, 0, 212, 0.08);
-            border: 1px solid rgba(255, 0, 212, 0.14);
-            color: var(--text-white);
-        }
-
-        .legal-stack {
-            display: grid;
-            gap: 24px;
-        }
-
-        @media (max-width: 980px) {
-            .legal-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .legal-hero,
-            .legal-card {
-                border-radius: 24px;
-                padding: 22px 18px;
-            }
-
-            .legal-title {
-                font-size: clamp(2.2rem, 12vw, 3.3rem);
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'style.css' %}?v=20260417-9">
 </head>
-<body style="display: block; background: var(--bg-black);">
+<body class="site-page info-page">
     <div class="glow-bg"></div>
 
     {% include 'includes/site_header.html' %}
 
-    <section class="section container" style="padding-top: 0; padding-bottom: 48px;">
-        <div class="legal-shell">
-            <div class="legal-hero" id="age-restrictions">
-                <span class="legal-pill">18+ Only</span>
-                <h1 class="legal-title">Вікові <span>обмеження</span></h1>
-                <p class="legal-subtitle">Офіційна інформація про правила придбання електронних сигарет і рідин до них в Україні, обмеження за віком та правові підстави для відмови в продажу.</p>
-            </div>
-
-            <div class="legal-grid">
-                <div class="legal-card">
-                    <span class="legal-label">Правила продажу</span>
-                    <h2>Вікові обмеження на придбання електронних сигарет</h2>
-                    <p>Продаж електронних сигарет, рідин до них та супутніх товарів в Україні дозволений виключно особам, які досягли 18 років, відповідно до Закону України «Про заходи щодо попередження та зменшення вживання тютюнових виробів і їх шкідливого впливу на здоров’я населення».</p>
-                    <p>Ці вимоги поширюються як на покупки у фізичних магазинах, так і на онлайн-замовлення. Під час оформлення замовлення покупець підтверджує свій вік, а у разі сумнівів продавець або менеджер має право запросити документ, що посвідчує особу.</p>
-                    <p>У разі виявлення порушення вікових обмежень продавець має право відмовити в продажу або скасувати замовлення без пояснення причин.</p>
-                    <div class="legal-note">Дотримання вікових обмежень є обов’язковою вимогою законодавства України.</div>
+    <section class="page-shell page-shell--info">
+        <div class="container">
+            <div class="legal-shell">
+                <div class="legal-hero" id="age-restrictions">
+                    <span class="legal-pill">18+ Only</span>
+                    <h1 class="legal-title">Вікові <span>обмеження</span></h1>
+                    <p class="legal-subtitle">
+                        Офіційна інформація про правила придбання електронних сигарет і рідин до них в Україні,
+                        обмеження за віком та правові підстави для відмови в продажу.
+                    </p>
                 </div>
 
-                <div class="legal-stack" id="legislation">
+                <div class="legal-grid">
                     <div class="legal-card">
-                        <span class="legal-label">Нормативно-правові акти</span>
-                        <h3>Які закони регулюють продаж</h3>
-                        <ul class="legal-list">
-                            <li>Закон України «Про заходи щодо попередження та зменшення вживання тютюнових виробів і їх шкідливого впливу на здоров’я населення»</li>
-                            <li>Закон України «Про рекламу»</li>
-                            <li>Закон України «Основи законодавства України про охорону здоров’я»</li>
-                        </ul>
+                        <span class="legal-label">Правила продажу</span>
+                        <h2>Продаж дозволений лише повнолітнім покупцям</h2>
+                        <p>
+                            Продаж електронних сигарет, рідин до них та супутніх товарів в Україні дозволений виключно
+                            особам, які досягли 18 років, відповідно до чинного законодавства України.
+                        </p>
+                        <p>
+                            Ці вимоги поширюються як на покупки у фізичних магазинах, так і на онлайн-замовлення. Під
+                            час оформлення замовлення покупець підтверджує свій вік, а у разі сумнівів продавець або
+                            менеджер має право запросити документ, що посвідчує особу.
+                        </p>
+                        <p>
+                            У разі виявлення порушення вікових обмежень продавець має право відмовити в продажу або
+                            скасувати замовлення без додаткових пояснень.
+                        </p>
+                        <div class="legal-note">
+                            Дотримання вікових обмежень є обов'язковою вимогою законодавства України та базовим
+                            правилом роботи VapeLand.
+                        </div>
                     </div>
 
-                    <div class="legal-card">
-                        <span class="legal-label">Що встановлено законом</span>
-                        <h3>Основні правила для покупця й продавця</h3>
-                        <ul class="legal-list">
-                            <li>заборонено продаж електронних сигарет особам, які не досягли 18 років;</li>
-                            <li>встановлено обмеження на рекламу та стимулювання продажу нікотиновмісної продукції;</li>
-                            <li>діють вимоги до маркування та інформування споживачів;</li>
-                            <li>заборонено використання електронних сигарет у визначених законом громадських місцях.</li>
-                        </ul>
-                        <p style="margin-top: 16px;">Метою законодавчого регулювання є захист здоров’я населення та обмеження доступу неповнолітніх до нікотинової продукції.</p>
+                    <div class="legal-stack" id="legislation">
+                        <div class="legal-card">
+                            <span class="legal-label">Нормативна база</span>
+                            <h3>Що регулює продаж</h3>
+                            <ul class="legal-list">
+                                <li>Закон України «Про заходи щодо попередження та зменшення вживання тютюнових виробів і їх шкідливого впливу на здоров'я населення».</li>
+                                <li>Закон України «Про рекламу».</li>
+                                <li>Закон України «Основи законодавства України про охорону здоров'я».</li>
+                            </ul>
+                        </div>
+
+                        <div class="legal-card">
+                            <span class="legal-label">Ключові правила</span>
+                            <h3>Що важливо знати покупцю</h3>
+                            <ul class="legal-list">
+                                <li>Заборонено продаж електронних сигарет особам, які не досягли 18 років.</li>
+                                <li>Діють обмеження на рекламу та стимулювання продажу нікотиновмісної продукції.</li>
+                                <li>Існують вимоги до маркування, попереджень і інформування споживачів.</li>
+                                <li>Користування електронними сигаретами в окремих громадських місцях обмежене законом.</li>
+                            </ul>
+                            <p>
+                                Мета цих правил проста: захист здоров'я населення та недопущення доступу
+                                неповнолітніх до нікотиновмісної продукції.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
+    {% include 'includes/site_footer.html' %}
     {% include 'includes/support_widget.html' %}
 </body>
 </html>
-
-

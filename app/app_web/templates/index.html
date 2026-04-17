@@ -1,4 +1,4 @@
-﻿{% load static %}
+{% load static %}
 {% load socialaccount %}
 <!DOCTYPE html>
 <html lang="uk">
@@ -6,14 +6,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VapeLand | м. Миколаїв</title>
-    <link rel="stylesheet" href="{% static 'style.css' %}?v=20260414-2">
+    <link rel="stylesheet" href="{% static 'style.css' %}?v=20260418-1">
 </head>
 <body>
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
             <h2 class="modal-title">Вхід у <span>VapeLand</span></h2>
-            <p class="modal-subtitle">Увійдіть у свій акаунт, щоб оформлювати замовлення ще швидше.</p>
+            <p class="modal-subtitle">Увійдіть у свій акаунт, щоб оформлювати замовлення швидше та бачити історію покупок.</p>
 
             <a href="{% provider_login_url 'google' %}" class="auth-btn google-btn">
                 <img src="{% static 'images/google.png' %}" alt="Google">
@@ -40,6 +40,12 @@
                     Преміальні POD-системи, картриджі та рідини для тих, хто любить яскравий смак і швидкий сервіс.
                     Доставка по місту <strong>Миколаїв</strong> щодня з <strong>09:00 до 20:00</strong>.
                 </p>
+
+                <div class="hero-actions">
+                    <a href="{% url 'catalog_page' %}" class="btn-primary">Перейти в каталог</a>
+                    <a href="{% url 'discounts' %}" class="btn-ghost">Умови знижок</a>
+                </div>
+
                 <div class="hero-stats">
                     <div class="hero-stat">
                         <span>місто</span>
@@ -51,7 +57,7 @@
                     </div>
                     <div class="hero-stat">
                         <span>формат</span>
-                        <strong>Безкоштовна доставка по місту Миколаїв</strong>
+                        <strong>Безкоштовна доставка по місту</strong>
                     </div>
                 </div>
             </div>
@@ -73,7 +79,7 @@
 
         <div class="popular-categories-grid">
             {% for category in popular_categories %}
-            <a href="{{ category.url }}" class="category-spotlight animate-fade" style="background-image: linear-gradient(180deg, rgba(5, 8, 18, 0.18), rgba(5, 8, 18, 0.9)), url('{{ category.image_url }}');">
+            <a href="{{ category.url }}" class="category-spotlight animate-fade" style="background-image: linear-gradient(180deg, rgba(5, 8, 18, 0.18), rgba(5, 8, 18, 0.92)), url('{{ category.image_url }}');">
                 <div class="category-spotlight-body">
                     <span class="section-kicker category-spotlight-kicker">VapeLand</span>
                     <h3>{{ category.name }}</h3>
@@ -99,7 +105,7 @@
     <section class="section container">
         <div class="section-header">
             <p class="section-kicker">Hot Drops</p>
-            <h2 class="section-title">⚡ Шалені <span>знижки!</span></h2>
+            <h2 class="section-title">Шалені <span>знижки</span></h2>
             <p class="section-copy">Товари з активними акціями. Для них діє окрема пріоритетна знижка з адмінки, тому додаткові знижки на ці позиції не накладаються.</p>
         </div>
 
@@ -108,10 +114,10 @@
             <a href="{% url 'product_detail' product.slug %}" class="product-card animate-fade product-card--discount product-card-link">
                 <div class="card-image">
                     <span class="discount-badge">{{ product.discount_data.discount_badge|default:"АКЦІЯ" }}</span>
-                    {% if product.image %}
-                    <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                    {% if product.card_image_url %}
+                    <img src="{{ product.card_image_url }}" alt="{{ product.name }}">
                     {% else %}
-                    <img src="https://via.placeholder.com/300x300?text=VapeLand" alt="{{ product.name }}">
+                    <img src="{% static 'images/logo.png' %}" alt="{{ product.name }}">
                     {% endif %}
                 </div>
                 <div class="card-body">
@@ -128,6 +134,20 @@
         </div>
     </section>
     {% endif %}
+
+    <section class="section container">
+        <div class="home-cta-banner">
+            <div>
+                <p class="section-kicker">Fast Service</p>
+                <h2 class="section-title section-title--compact">Замовив сьогодні <span>отримав швидко</span></h2>
+                <p class="section-copy">Оформлення без зайвих кроків, зрозумілі знижки та акуратна підтримка в одному інтерфейсі.</p>
+            </div>
+            <div class="home-cta-banner__actions">
+                <a href="{% url 'catalog_page' %}" class="btn-primary">Почати покупки</a>
+                <a href="{% url 'profile' %}" class="btn-ghost">Мій профіль</a>
+            </div>
+        </div>
+    </section>
 
     <section class="section container">
         <div class="section-header">
@@ -173,37 +193,16 @@
         </div>
     </section>
 
-    <footer id="contact" class="site-footer">
-        <div class="container footer-shell">
-            <div class="footer-brand">
-                <div class="logo logo-centered">VAPE <span>LAND</span></div>
-                <p>VapeLand у м. Миколаїв: швидкий вибір POD-систем, картриджів, рідин та аксесуарів у єдиному neon-просторі.</p>
-            </div>
-            <div class="footer-grid">
-                <div class="footer-card">
-                    <span class="footer-label">МІСТО</span>
-                    <strong>м. Миколаїв</strong>
-                    <p>Самовивіз та оперативна доставка по місту.</p>
-                </div>
-                <div class="footer-card">
-                    <span class="footer-label">ГРАФІК</span>
-                    <strong>09:00-20:00</strong>
-                    <p>Працюємо щодня без вихідних.</p>
-                </div>
-            </div>
-            <p class="footer-copy">&copy; 2026 VapeLand. 18+</p>
-        </div>
-    </footer>
-
+    {% include 'includes/site_footer.html' %}
     {% include 'includes/support_widget.html' %}
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const modal = document.getElementById('loginModal');
             const btns = document.querySelectorAll('.nav-cta');
             const span = document.querySelector('.close-modal');
 
-            btns.forEach(btn => {
+            btns.forEach((btn) => {
                 btn.onclick = (event) => {
                     event.preventDefault();
                     modal.style.display = 'flex';
@@ -225,8 +224,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-

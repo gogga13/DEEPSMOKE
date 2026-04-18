@@ -37,15 +37,28 @@
                     <strong>Замовлення та доставка</strong>
                     <p>Доставка по Миколаєву безкоштовна.</p>
                     <p>По Україні безкоштовно від 1050 грн.</p>
+                    {% if support_telegram_url or support_instagram_url %}
                     <p>Підтримка в Telegram та Instagram.</p>
+                    {% else %}
+                    <p>Контакти підтримки налаштовуються через env.</p>
+                    {% endif %}
                 </div>
 
                 <div class="footer-card">
                     <span class="footer-label">КОНТАКТИ</span>
                     <strong>Завжди на зв'язку</strong>
-                    <p><a href="tel:+380953600267">+380 95 360 02 67</a></p>
-                    <p><a href="https://t.me/MNN003" target="_blank" rel="noopener">Telegram</a></p>
-                    <p><a href="https://www.instagram.com/vape.landdd.d?igsh=MWVpbHQ5MTBrbjZ4cQ%3D%3D&utm_source=qr" target="_blank" rel="noopener">Instagram</a></p>
+                    {% if support_phone %}
+                    <p><a href="tel:{{ support_phone_href }}">{{ support_phone }}</a></p>
+                    {% endif %}
+                    {% if support_telegram_url %}
+                    <p><a href="{{ support_telegram_url }}" target="_blank" rel="noopener">Telegram</a></p>
+                    {% endif %}
+                    {% if support_instagram_url %}
+                    <p><a href="{{ support_instagram_url }}" target="_blank" rel="noopener">Instagram</a></p>
+                    {% endif %}
+                    {% if not support_phone and not support_telegram_url and not support_instagram_url %}
+                    <p>Контакти оновлюються.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>

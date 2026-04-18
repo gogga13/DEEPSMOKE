@@ -35,6 +35,13 @@ def env_bool(name, default=False):
     return value.lower() in {"1", "true", "yes", "on"}
 
 
+def env_str(name, default=""):
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip()
+
+
 def env_list(name, default=""):
     raw_value = os.getenv(name, default)
     return [item.strip() for item in raw_value.split(",") if item.strip()]
@@ -45,6 +52,13 @@ def env_int(name, default):
     if value is None or value == "":
         return default
     return int(value)
+
+
+def env_path(name, default):
+    value = os.getenv(name)
+    if value is None or value.strip() == "":
+        return Path(default)
+    return Path(value).expanduser()
 
 
 def has_real_email_credentials(username, password):
@@ -78,7 +92,7 @@ def secret_key_is_placeholder(value):
     return normalized in placeholders
 
 
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-change-me")
+SECRET_KEY = env_str("DJANGO_SECRET_KEY", "django-insecure-change-me")
 DEBUG = env_bool("DJANGO_DEBUG", default=False)
 
 default_allowed_hosts = "127.0.0.1,localhost,testserver" if DEBUG else ""
@@ -159,6 +173,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "app_web.context_processors.cart_processor",
+                "app_web.context_processors.support_processor",
             ],
         },
     },
@@ -208,22 +223,21 @@ TIME_ZONE = "Europe/Kyiv"
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "static"
+STATIC_URL = env_str("DJANGO_STATIC_URL", "/static/")
+STATIC_ROOT = env_path("DJANGO_STATIC_ROOT", BASE_DIR / "staticfiles")
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL = env_str("DJANGO_MEDIA_URL", "/media/")
+MEDIA_ROOT = env_path("DJANGO_MEDIA_ROOT", BASE_DIR / "media")
 
 PHONENUMBER_DEFAULT_REGION = "UA"
-EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_HOST = env_str("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+EMAIL_HOST_USER = env_str("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = env_str("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", default=True)
 EMAIL_USE_SSL = env_bool("EMAIL_USE_SSL", default=False)
 EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "30"))
-EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
-EMAIL_FILE_PATH.mkdir(parents=True, exist_ok=True)
+EMAIL_FILE_PATH = env_path("EMAIL_FILE_PATH", PROJECT_ROOT / "runtime" / "sent_emails")
 EMAIL_CREDENTIALS_CONFIGURED = has_real_email_credentials(EMAIL_HOST_USER, EMAIL_HOST_PASSWORD)
 EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND",
@@ -231,6 +245,8 @@ EMAIL_BACKEND = os.getenv(
     if EMAIL_CREDENTIALS_CONFIGURED
     else "django.core.mail.backends.filebased.EmailBackend",
 )
+if EMAIL_BACKEND.endswith("filebased.EmailBackend"):
+    EMAIL_FILE_PATH.mkdir(parents=True, exist_ok=True)
 DEFAULT_FROM_EMAIL = os.getenv(
     "DEFAULT_FROM_EMAIL",
     EMAIL_HOST_USER if EMAIL_CREDENTIALS_CONFIGURED else "noreply@vapeland.local",
@@ -239,18 +255,26 @@ SERVER_EMAIL = DEFAULT_FROM_EMAIL
 IMPORT_EXPORT_USE_TRANSACTIONS = True
 IMPORT_EXPORT_SKIP_ADMIN_CONFIRM = False
 
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
-NOVA_POSHTA_API_KEY = os.getenv("NOVA_POSHTA_API_KEY", "")
+TELEGRAM_BOT_TOKEN = env_str("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_CHAT_ID = env_str("TELEGRAM_CHAT_ID", "")
+TELEGRAM_API_TIMEOUT = env_int("TELEGRAM_API_TIMEOUT", 5)
+NOVA_POSHTA_API_KEY = env_str("NOVA_POSHTA_API_KEY", "")
+SUPPORT_TELEGRAM_URL = env_str("SUPPORT_TELEGRAM_URL", "")
+SUPPORT_INSTAGRAM_URL = env_str("SUPPORT_INSTAGRAM_URL", "")
+SUPPORT_PHONE = env_str("SUPPORT_PHONE", "")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = env_str("DJANGO_SESSION_COOKIE_SAMESITE", "Lax")
+    CSRF_COOKIE_SAMESITE = env_str("DJANGO_CSRF_COOKIE_SAMESITE", "Lax")
     SECURE_HSTS_SECONDS = int(os.getenv("DJANGO_SECURE_HSTS_SECONDS", "31536000"))
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", default=True)
     SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = env_str("DJANGO_SECURE_REFERRER_POLICY", "same-origin")
     X_FRAME_OPTIONS = "DENY"

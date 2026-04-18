@@ -14,7 +14,7 @@ This project is prepared for `Setup Python App` in cPanel and follows the HostiQ
 
 - Added `app/passenger_wsgi.py` for Passenger/cPanel startup.
 - Switched `STATIC_URL` to `/static/` for production-safe static URLs.
-- Moved collected static output to `app/static` so cPanel/Apache can serve `/static/` directly.
+- Moved collected static output to `app/staticfiles` so cPanel/Apache can serve collected assets cleanly.
 - Removed duplicate static discovery from Django settings so `collectstatic` can run cleanly.
 - Added production safeguards in Django settings:
   - production now requires a real `DJANGO_SECRET_KEY`
@@ -38,9 +38,11 @@ Use the production template from the repo root:
 2. Fill in real values:
    - `DJANGO_SECRET_KEY`
    - `DJANGO_ALLOWED_HOSTS`
-   - `DJANGO_CSRF_TRUSTED_ORIGINS`
-   - email credentials if you want real email sending
-   - Telegram/Nova Poshta keys if needed
+- `DJANGO_CSRF_TRUSTED_ORIGINS`
+- `DJANGO_STATIC_ROOT` / `DJANGO_MEDIA_ROOT` if your cPanel paths differ
+- support contacts if you want the site widget filled in
+- email credentials if you want real email sending
+- Telegram/Nova Poshta keys if needed
 
 Minimum example:
 

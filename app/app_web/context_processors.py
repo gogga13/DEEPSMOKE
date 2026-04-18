@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from .pricing import calculate_cart_summary, get_cart_items
 
 
@@ -20,4 +22,16 @@ def cart_processor(request):
         "cart_total": cart_summary["final_total"],
         "cart_products": cart_summary["items"],
         "cart_summary": cart_summary,
+    }
+
+
+def support_processor(request):
+    raw_phone = getattr(settings, "SUPPORT_PHONE", "").strip()
+    phone_href = "".join(char for char in raw_phone if char.isdigit() or char == "+")
+
+    return {
+        "support_telegram_url": getattr(settings, "SUPPORT_TELEGRAM_URL", "").strip(),
+        "support_instagram_url": getattr(settings, "SUPPORT_INSTAGRAM_URL", "").strip(),
+        "support_phone": raw_phone,
+        "support_phone_href": phone_href,
     }

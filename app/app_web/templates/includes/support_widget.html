@@ -5,18 +5,30 @@
         <h3>Потрібна допомога?</h3>
         <p>Підкажемо по смаках, сумісності товарів, доставці та оформленню замовлення.</p>
 
+        {% if support_telegram_url or support_instagram_url %}
         <div class="support-actions">
-            <a href="https://t.me/MNN003" target="_blank" rel="noopener" class="support-link support-link--telegram">
+            {% if support_telegram_url %}
+            <a href="{{ support_telegram_url }}" target="_blank" rel="noopener" class="support-link support-link--telegram">
                 Написати в Telegram
             </a>
-            <a href="https://www.instagram.com/vape.landdd.d?igsh=MWVpbHQ5MTBrbjZ4cQ%3D%3D&utm_source=qr" target="_blank" rel="noopener" class="support-link support-link--instagram">
+            {% endif %}
+            {% if support_instagram_url %}
+            <a href="{{ support_instagram_url }}" target="_blank" rel="noopener" class="support-link support-link--instagram">
                 Перейти в Instagram
             </a>
+            {% endif %}
         </div>
+        {% endif %}
 
+        {% if support_phone %}
         <div class="support-phone">
-            Телефон: <a href="tel:+380953600267" class="support-handle">+380953600267</a>
+            Телефон: <a href="tel:{{ support_phone_href }}" class="support-handle">{{ support_phone }}</a>
         </div>
+        {% elif not support_telegram_url and not support_instagram_url %}
+        <div class="support-phone">
+            Контакти підтримки оновлюються.
+        </div>
+        {% endif %}
     </div>
 </div>
 <script>

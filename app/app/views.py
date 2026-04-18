@@ -1,3 +1,4 @@
+import logging
 import random
 from datetime import timedelta
 
@@ -43,6 +44,7 @@ from app_web.pricing import (
 
 User = get_user_model()
 STATIC_IMAGE_FALLBACK = f"{settings.STATIC_URL}images/logo.png"
+logger = logging.getLogger(__name__)
 
 
 CATALOG_ICON_SVGS = {
@@ -238,6 +240,21 @@ def get_category_image_url(category):
     return STATIC_IMAGE_FALLBACK
 
 
+def get_product_primary_image_url(product, variants_queryset=None):
+    if getattr(product, "image", None):
+        return product.image.url
+
+    variants = variants_queryset
+    if variants is None:
+        variants = product.variants.filter(is_active=True)
+
+    variant_image = variants.filter(image__isnull=False).exclude(image="").first()
+    if variant_image and getattr(variant_image, "image", None):
+        return variant_image.image.url
+
+    return STATIC_IMAGE_FALLBACK
+
+
 def build_featured_categories():
     featured_categories = (
         Category.objects.filter(is_featured=True, parent__isnull=True)
@@ -277,11 +294,11 @@ def send_telegram_message(text):
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     payload = {"chat_id": chat_id, "text": text}
     try:
-        response = requests.post(url, data=payload, timeout=5)
+        response = requests.post(url, data=payload, timeout=settings.TELEGRAM_API_TIMEOUT)
         response.raise_for_status()
         return response.json()
     except requests.RequestException as exc:
-        print(f"Telegram send error: {exc}")
+        logger.warning("Telegram send error: %s", exc)
         return None
 
 
@@ -442,19 +459,12 @@ def search_products(request):
 
     results = []
     for product in products:
-        if product.image:
-            image_url = product.image.url
-        else:
-            variant_image = (
-                product.variants.filter(is_active=True, image__isnull=False).exclude(image="").order_by("id").values_list("image", flat=True).first()
-            )
-            image_url = f"{settings.MEDIA_URL}{variant_image}" if variant_image else STATIC_IMAGE_FALLBACK
         results.append(
             {
                 "id": product.id,
                 "name": product.name,
                 "price": float(product.discount_data["final_price"]),
-                "image": image_url,
+                "image": get_product_primary_image_url(product),
                 "url": reverse("product_detail", args=[product.slug]),
             }
         )
@@ -842,12 +852,7 @@ def place_order(request):
 def product_detail(request, slug):
     product = get_object_or_404(Product.objects.select_related("category"), slug=slug, is_active=True)
     variants = product.variants.filter(is_active=True).order_by("id")
-    primary_image_url = None
-    if product.image:
-        primary_image_url = product.image.url
-    else:
-        variant_image = variants.filter(image__isnull=False).exclude(image="").first()
-        primary_image_url = variant_image.image.url if variant_image and variant_image.image else STATIC_IMAGE_FALLBACK
+    primary_image_url = get_product_primary_image_url(product, variants_queryset=variants)
     compatible = list(product.compatible_products.filter(is_active=True)[:4])
     similar_qs = product.similar_products.filter(is_active=True).exclude(pk=product.pk)
     similar = list(similar_qs[:4])
@@ -987,7 +992,6 @@ def password_reset_confirm_view(request):
             return redirect("account_login")
 
     return render(request, "account/password_reset_confirm.html", {"form": form, "email": email})
-
 
 
 
